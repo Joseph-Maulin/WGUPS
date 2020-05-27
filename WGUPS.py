@@ -1,5 +1,7 @@
 
-# need to
+# need to pack truck 2 with all truck 2 packages
+# group packages that have to be delivered
+# prioritize delivery_deadlines
 
 
 
