@@ -72,21 +72,61 @@ class Delivery_Distribution:
         return self.lookup_package(packageID=packageID)[0].status
 
 
-
     def find_route(self, current_location, distances, route_length=16):
 
         route_length = 100000
         shortest_route = []
-        location_visited = []
+        location_visited = [current_location]
 
         # start at current_location
         # go through status not delivered
 
-        for package in self.packages:
-            temp_route = []
-            while len(temp_route) < route_length:
-                distances[package.address_Name]
+        temp_route = []
+        temp_route_length = 0
+        packages = 0
+        locations = self.get_available_locations()
 
+        for location in locations:
+            while packages < 16:
+                available_locations = [loc for loc in locations if loc not in location_visited]
+                for loc in available_locations:
+                    temp_route.append(loc)
+                    temp_route_length
+
+
+    def find_best_route(self, location, visited, available, package):
+        if not available:
+            return 0
+
+        elif package == 16:
+            return 0
+
+        else:
+
+            for loc in available:
+                visited.append(location)
+                package+=get_num_packages(loc)
+                loc = self.get_available_locations()
+                available_locations = [l for l in loc if l not in visited]
+                self.find_best_route(loc, visited, available, package)
+
+
+    def get_num_packages(self, location):
+        n = 0
+        for pacakage in self.packages:
+            if package.address_Name == "location":
+                n+=1
+
+        return n
+
+
+    def get_available_locations(self):
+        available = []
+        for package in self.packages:
+            if package.status != "Delivered":
+                available.append(package.address_Name)
+
+        return list(set(available))
 
 
 
@@ -117,4 +157,4 @@ if __name__ == "__main__":
                        available=available,
                        packaged_with=packaged_with)
 
-    print(len(dd.lookup_package(delivery_deadline="10:30")))
+    dd.find_route("HUB", Distances)
