@@ -73,6 +73,21 @@ class Delivery_Distribution:
 
 
 
+    def find_route(self, current_location, distances, route_length=16):
+
+        route_length = 100000
+        shortest_route = []
+        location_visited = []
+
+        # start at current_location
+        # go through status not delivered
+
+        for package in self.packages:
+            temp_route = []
+            while len(temp_route) < route_length:
+                distances[package.address_Name]
+
+
 
 
 if __name__ == "__main__":
