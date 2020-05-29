@@ -28,4 +28,10 @@ def longest_common_substring(str1, str2):
     return str1[start_index : max_value_row + 1]
 
 
-print(longest_common_substring("hello", "jello"))
+# print(longest_common_substring("hello", "jello"))
+
+l = ["A", "B"]
+
+l.remove("A")
+
+print(l)

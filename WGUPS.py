@@ -74,50 +74,69 @@ class Delivery_Distribution:
 
     def find_route(self, current_location, distances, route_length=16):
 
-        route_length = 100000
-        shortest_route = []
+        # ["loc" : [route], packages, distance] if new ppd>ppd route = new route
+
+        shortest_routes = {"HUB":[[],None]}
         location_visited = [current_location]
 
-        # start at current_location
-        # go through status not delivered
+        # temp_routes = {}
 
-        temp_route = []
-        temp_route_length = 0
-        packages = 0
         locations = self.get_available_locations()
+        while locations:
+            best_location = None
+            best_ppd = 0
+            for location in locations:
+                packages = self.get_num_packages(location)
+                distance = distances.distances[current_location][location]
+                ppd = packages / distance
 
-        for location in locations:
-            while packages < 16:
-                available_locations = [loc for loc in locations if loc not in location_visited]
-                for loc in available_locations:
-                    temp_route.append(loc)
-                    temp_route_length
+                if location in shortest_routes.keys():
+                    new_route = shortest_routes[current_location][0] + [location]
+                    route_packages = sum(self.get_num_packages(l) for l in shortest_routes[current_location][0]) + packages
+                    route_distance = self.get_route_distance(new_route, distances.distances)
+
+                    total_ppd = route_packages / route_distance
+
+                    if total_ppd > shortest_routes[location][1]:
+                        shortest_routes[location] = [new_route, total_ppd]
+
+                else:
+                    shortest_routes[location] = [["HUB"]+[location], ppd]
+
+                if ppd > best_ppd:
+                    best_ppd = ppd
+                    best_location = location
+
+            current_location = best_location
+            locations.remove(current_location)
+            best_location = None
+            best_ppd = None
 
 
-    def find_best_route(self, location, visited, available, package):
-        if not available:
-            return 0
-
-        elif package == 16:
-            return 0
-
-        else:
-
-            for loc in available:
-                visited.append(location)
-                package+=get_num_packages(loc)
-                loc = self.get_available_locations()
-                available_locations = [l for l in loc if l not in visited]
-                self.find_best_route(loc, visited, available, package)
-
+        # get route with best ppd
+        for i,c in shortest_routes.items():
+            print(i)
+            print(c)
+            print(sum(self.get_num_packages(l) for l in c[0]))
+            print("\n")
 
     def get_num_packages(self, location):
         n = 0
-        for pacakage in self.packages:
-            if package.address_Name == "location":
+        for package in self.packages:
+            if package.address_Name == location:
                 n+=1
 
         return n
+
+    def get_route_distance(self, route, distances):
+
+        #[a,b,c]
+        #distances.distances[a][b] + distances.distances[b][c]
+        distance = 0
+        for i in range(len(route)-1):
+            distance += distances[route[i]][route[i+1]]
+
+        return distance
 
 
     def get_available_locations(self):
@@ -127,6 +146,8 @@ class Delivery_Distribution:
                 available.append(package.address_Name)
 
         return list(set(available))
+
+
 
 
 
