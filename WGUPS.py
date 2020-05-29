@@ -33,8 +33,9 @@ class Package:
 
 class Delivery_Distribution:
 
-    def __init__(self):
+    def __init__(self, distances):
         self.packages = []
+        self.distances = distances
 
 
     def add_package(self, packageID, delivery_address, address_Name, delivery_deadline, delivery_city, delivery_zip_code, weight, status, truck=0, available="8:00", packaged_with=[]):
@@ -72,24 +73,29 @@ class Delivery_Distribution:
         return self.lookup_package(packageID=packageID)[0].status
 
 
-    def find_route(self, current_location, distances, route_length=16):
+    def find_route(self, current_location, route_length=16):
 
-        # ["loc" : [route], packages, distance] if new ppd>ppd route = new route
+        # need to add delivery_deadline checks/lookaheads
 
+        # [[route], packages/distance]
         shortest_route = [[current_location], 0]
         location_visited = [current_location]
 
-        # temp_routes = {}
-
         locations = self.get_available_locations()
+        if current_location in locations:
+            locations.remove(current_location)
         packages = 0
-        while locations and packages<16:
+
+        while locations and packages<route_length:
             best_location = None
             best_ppd = 0
             for location in locations:
                 new_route = shortest_route[0] + [location]
                 route_packages = sum(self.get_num_packages(l) for l in new_route)
-                route_distance = self.get_route_distance(new_route, distances.distances)
+                route_distance = self.get_route_distance(new_route)
+                # need to adjust taking final return to hub
+                if len(locations) < 2:
+                    route_distance += self.distances.distances["HUB"][location]
 
                 total_ppd = route_packages / route_distance
 
@@ -106,14 +112,11 @@ class Delivery_Distribution:
             best_location = None
             best_ppd = None
 
+            yield shortest_route
 
-        # get route with best ppd
-
-        # route_packages = sum(self.get_num_packages(l) for l in shortest_routes[current_location][0]) + packages
-        # route_distance = self.get_route_distance(new_route, distances.distances)
-        #
-        # total_ppd = route_packages / route_distance
-        print(shortest_route)
+        # print(shortest_route)
+        shortest_route[0].append("HUB")
+        return shortest_route
 
     def get_num_packages(self, location):
         n = 0
@@ -123,13 +126,13 @@ class Delivery_Distribution:
 
         return n
 
-    def get_route_distance(self, route, distances):
+    def get_route_distance(self, route):
 
         #[a,b,c]
         #distances.distances[a][b] + distances.distances[b][c]
         distance = 0
         for i in range(len(route)-1):
-            distance += distances[route[i]][route[i+1]]
+            distance += self.distances.distances[route[i]][route[i+1]]
 
         return distance
 
@@ -143,12 +146,16 @@ class Delivery_Distribution:
         return list(set(available))
 
 
+    def route_time(self, route):
+        distance = self.get_route_distance(route)
+        print(f"distance: {distance}")
+        print(distance/18)
 
 
 
 if __name__ == "__main__":
-    dd = Delivery_Distribution()
     Distances = Distances()
+    dd = Delivery_Distribution(Distances)
     for packageID, package_vars in packages.items():
         truck = 0
         available = "8:00"
@@ -173,4 +180,5 @@ if __name__ == "__main__":
                        available=available,
                        packaged_with=packaged_with)
 
-    dd.find_route("HUB", Distances)
+    for x in dd.find_route('HUB'):
+        print(x)
