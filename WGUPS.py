@@ -188,10 +188,10 @@ if __name__ == "__main__":
     delivery_time = datetime(2020,5,29,8,0,0)
     end_time = delivery_time + timedelta(hours=2)
     while delivery_time < end_time:
-        for route in dd.find_route("HUB"):
+        for route in dd.find_route('Deker Lake'):
             delivered_time = delivery_time + timedelta(seconds=dd.route_time(route))
+            print(route[0], delivery_time.strftime("%H:%M:%S"))
             while delivery_time < delivered_time:
-                print(route[0], delivery_time.strftime("%H:%M:%S"))
                 delivery_time += timedelta(seconds=1)
         else:
             print("HUB", delivery_time.strftime("%H:%M:%S"))
