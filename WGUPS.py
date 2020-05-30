@@ -3,7 +3,8 @@
 # group packages that have to be delivered
 # prioritize delivery_deadlines
 from data import packages, Distances
-
+import time
+from datetime import timedelta, time, datetime
 
 class Truck:
 
@@ -112,11 +113,11 @@ class Delivery_Distribution:
             best_location = None
             best_ppd = None
 
-            yield shortest_route
+            yield shortest_route[0][-2:]
 
         # print(shortest_route)
         shortest_route[0].append("HUB")
-        return shortest_route
+        return shortest_route[0]+["HUB"]
 
     def get_num_packages(self, location):
         n = 0
@@ -147,9 +148,13 @@ class Delivery_Distribution:
 
 
     def route_time(self, route):
-        distance = self.get_route_distance(route)
-        print(f"distance: {distance}")
-        print(distance/18)
+        distance_miles = self.get_route_distance(route)
+
+        # miles / miles/hour
+        # hours * 60 * 60
+        distance_time = (distance_miles / 18) * 60 * 60
+
+        return distance_time
 
 
 
@@ -180,5 +185,26 @@ if __name__ == "__main__":
                        available=available,
                        packaged_with=packaged_with)
 
-    for x in dd.find_route('HUB'):
-        print(x)
+    delivery_time = datetime(2020,5,29,8,0,0)
+    end_time = delivery_time + timedelta(hours=2)
+    while delivery_time < end_time:
+        for route in dd.find_route("HUB"):
+            delivered_time = delivery_time + timedelta(seconds=dd.route_time(route))
+            while delivery_time < delivered_time:
+                print(route[0], delivery_time.strftime("%H:%M:%S"))
+                delivery_time += timedelta(seconds=1)
+        else:
+            print("HUB", delivery_time.strftime("%H:%M:%S"))
+            break
+
+    # print(sum(dd.route_time(x) for x in dd.find_route('HUB')))
+
+
+
+
+
+
+
+
+
+        ########
