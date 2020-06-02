@@ -18,6 +18,7 @@ class Truck:
         self.visited_hub = True
         self.shortest_route = ["HUB"]
         self.location_visited = []
+        self.route_time = 0
 
     def print_packages(self):
         for package in self.packages:
@@ -110,9 +111,6 @@ class Delivery_Distribution:
             truck1_route = self.find_route(truck1)
             truck2_route = self.find_route(truck2)
 
-            print(f"truck1: {truck1_route}")
-            print(f"truck2: {truck2_route}")
-
             if truck1_route:
                 if truck1_route[1] >= truck2_route[1]:
                     self.add_route(truck1, truck1_route)
@@ -121,9 +119,6 @@ class Delivery_Distribution:
                     self.add_route(truck2, truck2_route)
                 elif truck1_route[1] < truck2_route[1]:
                     self.add_route(truck2, truck2_route)
-
-            print(f"truck 1 route: {truck1.shortest_route}")
-            print(f"truck 2 route: {truck2.shortest_route}")
 
             not_delivered_count = 0
             for package in self.packages:
@@ -137,13 +132,24 @@ class Delivery_Distribution:
                 print("maxed out trucks")
                 break
 
+        not_delivered_count = 0
+        for package in self.packages:
+            if package.status == "Not Delivered":
+                print(package)
+                not_delivered_count += 1
+
+        print(f"\npackages_left: {not_delivered_count}")
+
+        delivery_time = datetime(2020,5,29,8,0,0)
+
         print("\ntruck1")
         print(self.get_route_distance(truck1.shortest_route))
-        print(self.route_time(truck1.shortest_route)/60/60)
+        print(delivery_time + timedelta(seconds=truck1.route_time))
 
         print("\ntruck2")
         print(self.get_route_distance(truck2.shortest_route))
-        print(self.route_time(truck2.shortest_route)/60/60)
+        print(truck2.shortest_route, )
+        print(delivery_time + timedelta(seconds=truck2.route_time))
 
 
     def add_route(self, truck, location):
@@ -156,36 +162,16 @@ class Delivery_Distribution:
 
         truck.current_location = location[0]
         truck.locations.remove(truck.current_location)
+        truck.route_time = self.route_time(truck.shortest_route)
 
         truck.shortest_route.append(location[0])
 
     def find_route(self, truck, location_taken=None):
 
-        # go by shortest_route between trucks delete location for both if room
-        # hub packages route = "current, hub, location" distance
-        # if visited hub remove current, hub, because they could have picked these up
-        # need to add delivery_deadline checks/lookaheads
-
-        # class Truck:
-        #
-        #     def __init__(self, truckNum):
-        #         self.max_packages = 16
-        #         self.average_speed = 18
-        #         self.truckNum = truckNum
-        #         self.packages = []
-        #         self.locations = []
-        #         self.current_location = "HUB"
-        #         self.visited_hub = True
-        #         self.shortest_route = []
-        #         self.location_visited = []
+        # truck 2, packaged_with, delivery_deadline
 
         shortest_route = [[truck.current_location], 0]
         location_visited = [truck.current_location]
-
-        # locations = self.get_available_locations()
-        # if current_location in locations:
-        #     locations.remove(current_location)
-        # packages = 0
 
         if truck.locations and len(truck.packages) < truck.max_packages:
             best_location = None
@@ -226,6 +212,8 @@ class Delivery_Distribution:
         for i in range(len(route)-1):
             distance += self.distances.distances[route[i]][route[i+1]]
 
+        print(route)
+        print(distance, "\n")
         return distance
 
 
