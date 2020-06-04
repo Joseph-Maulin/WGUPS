@@ -353,8 +353,6 @@ class Delivery_Distribution:
             #     -add deadlines to trucks first
 
 
-
-
         shortest_route = [[truck.current_location], 0]
         location_visited = [truck.current_location]
 
