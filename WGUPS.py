@@ -68,16 +68,16 @@ class Package:
         self.delivery_deadline = delivery_deadline  :  Time package needs to be delivered by.
         self.delivery_city = delivery_city  :  City of address.
         self.delivery_zip_code = delivery_zip_code  :  Zip Code of address.
-        self.weight = weight  :  Weight of the pacakge
-        self.status = status  :  
-        self.truck = truck
-        self.available = available
-        self.packaged_with = packaged_with
-        self.delivery_time = None
+        self.weight = weight  :  Weight of the pacakge.
+        self.status = status  :  Delivery Status of packages. "Delivered", "Out for delivery", "Not Delivered".
+        self.truck = truck  :  Truck that is assigned to.
+        self.available = available  :  Time that package is available for delivery.
+        self.packaged_with = packaged_with  :  packageID's that have to be loaded at the same time.
+        self.delivery_time = None  :  Time of delivery completion.
 
     Methods
     ________
-
+        None
     """
 
     def __init__(self, packageID, delivery_address, address_Name, delivery_deadline, delivery_city, delivery_zip_code, weight, status, truck=0, available="8:00", packaged_with=[]):
@@ -110,6 +110,58 @@ class Package:
 
 
 class Delivery_Distribution:
+    """
+    Function
+    _________
+        Controls routing
+
+    Params
+    _______
+        __init__(self, distances, trucks=[])
+
+        self.packages = []  :  Packages in the system.
+        self.left_to_deliver = 0  :  Packages without "Delivered" status.
+        self.distances = distances  :  Distances object that holds distance information between locations.
+        self.trucks = trucks  :  Array of Truck objects in the system.
+        self.delivery_time = datetime(2020,5,29,8,0,0)  :  Time of day. Start 8:00
+        self.end_time = self.delivery_time + timedelta(hours=9)  :  End of day.
+
+    Methods
+    ________
+        add_package(self, packageID, delivery_address, address_Name, delivery_deadline, delivery_city, delivery_zip_code, weight, status, truck=0, available="8:00", packaged_with=[])
+            -- adds package to self.packages
+
+        lookup_package(self, packageID=None, delivery_address=None, address_Name=None, delivery_deadline=None, delivery_city=None, delivery_zip_code=None, weight=None, status=None)
+            -- lookup package
+
+        lookup_status(self, packageID)
+            -- lookup package status givin ID
+
+        cycle_timer(self)
+            -- simulates day
+
+        get_truck_routes(self, truck)
+            -- finds optimal route and adds for givin truck
+
+        add_route(self, truck, location)
+            -- adds route to truck, updates truck and package information
+
+        find_route(self, truck, location_taken=None)
+            -- find optimal route from available locations
+
+        get_packages(self, location, truck)
+            -- return valid packages for truck at location
+
+        get_route_distance(self, route)
+            -- return distance of passed route
+
+        get_available_locations(self, truck)
+            -- return available locations passed truck
+
+        route_time(self, route)
+            -- return time it takes to complete route
+
+    """
 
     def __init__(self, distances, trucks=[]):
         self.packages = []
@@ -160,19 +212,7 @@ class Delivery_Distribution:
     def lookup_status(self, packageID):
         return self.lookup_package(packageID=packageID)[0].status
 
-    # self.delivery_time = datetime(2020,5,29,8,0,0)
-    # self.end_time = delivery_time + timedelta(hours=9)
-    # while delivery_time < end_time:
-    #     for route in dd.find_route('Deker Lake'):
-    #         delivered_time = delivery_time + timedelta(seconds=dd.route_time(route))
-    #         print(route[0], delivery_time.strftime("%H:%M:%S"))
-    #         while delivery_time < delivered_time:
-    #             delivery_time += timedelta(seconds=1)
-    #     else:
-    #         print("HUB", delivery_time.strftime("%H:%M:%S"))
-    #         break
 
-    # print(sum(dd.route_time(x) for x in dd.find_route('HUB')))
     def cycle_timer(self):
         self.left_to_deliver = len(self.packages)
 
