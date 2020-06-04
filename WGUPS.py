@@ -340,6 +340,21 @@ class Delivery_Distribution:
 
         # packaged_with, delivery_deadline
 
+        # # IDEA:
+            # packaged_with:
+            #     -preload all pacakged_with onto truck
+            #     -since I can return best_location as an array add all together
+            #         and add all at once when you grab one
+            #
+            # delivery_deadline
+            #     -combine distance/time for all deadline packages and see if it can be met.
+            #         -can choose ppd route if combined - other routes is still possible
+            #          else deadline route
+            #     -add deadlines to trucks first
+
+
+
+
         shortest_route = [[truck.current_location], 0]
         location_visited = [truck.current_location]
 
