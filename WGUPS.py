@@ -13,6 +13,8 @@ class Truck:
         self.average_speed = 18
         self.truckNum = truckNum
         self.packages = []
+        self.packages_delivered = 0
+        self.carried_without_going_to_hub = 0
         self.locations = []
         self.current_location = "HUB"
         self.visited_hub = True
@@ -123,33 +125,49 @@ class Delivery_Distribution:
         truck1.time_of_next_delivered = self.delivery_time
         truck2.time_of_next_delivered = self.delivery_time
 
+        truck1_done = False
+        truck2_done = False
+
         while self.delivery_time < self.end_time:
 
             print(self.delivery_time)
 
-            if truck1.time_of_next_delivered <= self.delivery_time:
-                if truck1.packages:
-                    packages_delivered = self.get_packages(truck1.currently_delivering, truck1)
-                    for package in packages_delivered:
-                        package.delivery_time = self.delivery_time
-                        truck1.packages.remove(package)
-                route = self.get_truck_routes(truck1)
-                if route:
-                    truck1.time_of_next_delivered = self.delivery_time + timedelta(seconds=self.route_time(route))
-                    print(truck1.time_of_next_delivered, truck1.packages[-1])
+            if not truck1_done:
+                if truck1.time_of_next_delivered <= self.delivery_time:
+                    if truck1.packages:
+                        packages_delivered = self.get_packages(truck1.currently_delivering, truck1)
+                        for package in packages_delivered:
+                            package.delivery_time = self.delivery_time
+                            truck1.packages.remove(package)
+                    route = self.get_truck_routes(truck1)
+                    if route:
+                        truck1.time_of_next_delivered = self.delivery_time + timedelta(seconds=self.route_time(route))
+                        print(truck1.time_of_next_delivered, truck1.packages[-1])
+                    else:
+                        truck1.shortest_route.append("HUB")
+                        print("truck1 done..")
+                        truck1_done = True
 
-            if truck2.time_of_next_delivered <= self.delivery_time:
-                if truck2.packages:
-                    packages_delivered = self.get_packages(truck2.currently_delivering, truck2)
-                    for package in packages_delivered:
-                        package.delivery_time = self.delivery_time
-                        truck2.packages.remove(package)
-                route = self.get_truck_routes(truck2)
-                if route:
-                    truck2.time_of_next_delivered = self.delivery_time + timedelta(seconds=self.route_time(route))
-                    print(truck1.time_of_next_delivered, truck2.packages[-1])
+            if not truck2_done:
+                if truck2.time_of_next_delivered <= self.delivery_time:
+                    if truck2.packages:
+                        packages_delivered = self.get_packages(truck2.currently_delivering, truck2)
+                        for package in packages_delivered:
+                            package.delivery_time = self.delivery_time
+                            truck2.packages.remove(package)
+                    route = self.get_truck_routes(truck2)
+                    if route:
+                        truck2.time_of_next_delivered = self.delivery_time + timedelta(seconds=self.route_time(route))
+                        print(truck1.time_of_next_delivered, truck2.packages[-1])
+                    else:
+                        truck2.shortest_route.append("HUB")
+                        print("truck2 done..")
+                        truck2_done = True
 
-            self.delivery_time += timedelta(seconds=1)
+            if truck2_done and truck1_done:
+                break
+            else:
+                self.delivery_time += timedelta(seconds=1)
 
         not_delivered_count = 0
         for package in self.packages:
@@ -162,11 +180,12 @@ class Delivery_Distribution:
 
         print("\ntruck1")
         print(self.get_route_distance(truck1.shortest_route))
+        print(truck1.shortest_route)
         print(delivery_time + timedelta(seconds=truck1.route_time))
 
         print("\ntruck2")
         print(self.get_route_distance(truck2.shortest_route))
-        print(truck2.shortest_route, )
+        print(truck2.shortest_route)
         print(delivery_time + timedelta(seconds=truck2.route_time))
 
 
@@ -246,14 +265,24 @@ class Delivery_Distribution:
 
     def add_route(self, truck, location):
 
-        truck.current_location = location[0]
+        new_location = location[0]
+        if "HUB" in location[0]:
+            new_location = new_location[1]
+            truck.shortest_route.append("HUB")
+            truck.carried_without_going_to_hub = 0
+
+        print(new_location)
+
+        truck.current_location = new_location
         truck.locations.remove(truck.current_location)
         truck.route_time = self.route_time(truck.shortest_route)
-        truck.shortest_route.append(location[0])
-        truck.currently_delivering = location[0]
+        truck.shortest_route.append(new_location)
+        truck.currently_delivering = new_location
 
-        location_packages = self.get_packages(location[0], truck)
+        location_packages = self.get_packages(new_location, truck)
         truck.packages += location_packages
+        truck.packages_delivered += len(location_packages)
+        truck.carried_without_going_to_hub += len(location_packages)
         for package in location_packages:
             package.truck = truck.truckNum
             package.status = "Delivered"
@@ -272,7 +301,7 @@ class Delivery_Distribution:
             for location in truck.locations:
                 new_route = shortest_route[0] + [location]
                 packages = self.get_packages(location, truck)
-                if (len(truck.packages) + len(packages) <= truck.max_packages):
+                if (truck.carried_without_going_to_hub + len(truck.packages) + len(packages) <= truck.max_packages):
                     route_distance = self.get_route_distance(new_route)
 
                     location_ppd = len(packages) / route_distance
@@ -280,6 +309,16 @@ class Delivery_Distribution:
                     if location_ppd > best_ppd:
                         best_ppd = location_ppd
                         best_location = location
+
+                else:
+                    route_distance = self.get_route_distance(new_route) + self.distances.distances["HUB"][location]
+
+                    location_ppd = len(packages) / route_distance
+
+                    if location_ppd > best_ppd:
+                        best_ppd = location_ppd
+                        best_location = ["HUB", location]
+
 
             return (best_location, best_ppd)
 
