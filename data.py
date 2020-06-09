@@ -6,7 +6,7 @@ packages = {1: {"Address":"195 W Oakland Ave", "City":"Salt Lake City", "Zip":"8
             6: {"Address":"3060 Lester St", "City":"West Valley City", "Zip":"84119", "Delivery_Deadline":"10:30", "Weight":"88", "Available":"9:05"},
             7: {"Address":"1330 2100 S", "City":"Salt Lake City", "Zip":"84106", "Delivery_Deadline":"EOD", "Weight":"8"},
             8: {"Address":"300 State St", "City":"Salt Lake City", "Zip":"84103", "Delivery_Deadline":"EOD", "Weight":"9"},
-            9: {"Address":"300 State St", "City":"Salt Lake City", "Zip":"84103", "Delivery_Deadline":"EOD", "Weight":"2"},
+            9: {"Address":"410 S State St", "City":"Salt Lake City", "Zip":"84111", "Delivery_Deadline":"EOD", "Weight":"2", "Available":"10:20"},
             10: {"Address":"600 E 900 South", "City":"Salt Lake City", "Zip":"84105", "Delivery_Deadline":"EOD", "Weight":"1"},
             11: {"Address":"2600 Taylorsville Blvd", "City":"Salt Lake City", "Zip":"84118", "Delivery_Deadline":"EOD", "Weight":"1"},
             12: {"Address":"3575 W Valley Central Station bus Loop", "City":"West Valley City", "Zip":"84119", "Delivery_Deadline":"EOD", "Weight":"1"},
@@ -40,6 +40,7 @@ packages = {1: {"Address":"195 W Oakland Ave", "City":"Salt Lake City", "Zip":"8
             40: {"Address":"380 W 2880 S", "City":"Salt Lake City", "Zip":"84115", "Delivery_Deadline":"10:30", "Weight":"45"}
             }
 
+            # 14 15 19 16 13 20
 
 class Distances:
 
