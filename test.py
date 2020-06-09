@@ -34,4 +34,6 @@ l = ["A", "B"]
 
 l.remove("A")
 
-print(l)
+
+if type(l) == list:
+    print('list')
