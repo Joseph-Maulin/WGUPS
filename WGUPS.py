@@ -5,6 +5,7 @@
 from data import packages, Distances
 import time
 from datetime import timedelta, time, datetime
+from pprint import pprint
 
 class Truck:
     """
@@ -250,6 +251,7 @@ class Delivery_Distribution:
                         if self.left_to_deliver > 0 and truck1.current_location != "HUB":
                             truck1.shortest_route.append("HUB")
                             truck1.current_location = "HUB"
+                            truck1.carried_without_going_to_hub = 0
                         else:
                             if truck1.current_location != "HUB":
                                 truck1.shortest_route.append("HUB")
@@ -272,6 +274,7 @@ class Delivery_Distribution:
                         if self.left_to_deliver > 0 and truck2.current_location != "HUB":
                             truck2.shortest_route.append("HUB")
                             truck2.current_location = "HUB"
+                            truck2.carried_without_going_to_hub = 0
                         else:
                             if truck2.current_location != "HUB":
                                 truck2.shortest_route.append("HUB")
@@ -305,9 +308,10 @@ class Delivery_Distribution:
         if len(truck.packages) == 16:
             return None
 
-        print(truck.truckNum, truck.carried_without_going_to_hub)
-
         truck.locations = self.get_available_locations(truck)
+
+        print(truck.truckNum, truck.carried_without_going_to_hub)
+        pprint(truck.locations)
 
         truck_route = self.find_route(truck)
 
