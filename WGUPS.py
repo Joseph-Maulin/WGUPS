@@ -176,6 +176,7 @@ class Delivery_Distribution:
         self.end_time = self.delivery_time + timedelta(hours=9)
         self.packaged_with_left = [13, 14, 15, 16, 19, 20]
         self.packaged_with_truck = 0
+        self.packages_with_deadlines = 0
 
     def add_package(self, packageID, delivery_address, address_Name, delivery_deadline, delivery_city, delivery_zip_code, weight, status, truck=0, available="8:00", packaged_with=[]):
         if available == "8:00":
@@ -238,7 +239,12 @@ class Delivery_Distribution:
             #print(self.delivery_time, "  ", truck1.time_left_hub, " ", truck2.time_left_hub)
             if not truck1_done:
                 if truck1.time_of_next_delivered <= self.delivery_time:
-                    print([package.address_Name for package in truck1.packages], truck1.carried_without_going_to_hub, truck1.shortest_route)
+                    # print(self.get_route_distance(truck1.shortest_route))
+                    # print(truck1.carried_without_going_to_hub)
+                    # print(truck1.time_left_hub)
+                    # print(self.delivery_time)
+                    # print(truck1.shortest_route)
+                    # print("\n")
                     if truck1.packages:
                         # packages_delivered = self.get_packages(truck1.currently_delivering_to, truck1)
                         for package in truck1.currently_delivering:
@@ -252,6 +258,8 @@ class Delivery_Distribution:
                     else:
                         if self.left_to_deliver > 0 and truck1.current_location != "HUB":
                             truck1.shortest_route.append("HUB")
+                            truck1.time_left_hub = self.delivery_time
+                            truck1.time_of_next_delivered = self.delivery_time + timedelta(seconds = self.route_time([truck1.current_location, "HUB"]))
                             truck1.current_location = "HUB"
                             truck1.carried_without_going_to_hub = 0
                         else:
@@ -262,6 +270,12 @@ class Delivery_Distribution:
 
             if not truck2_done:
                 if truck2.time_of_next_delivered <= self.delivery_time:
+                    # print(self.get_route_distance(truck2.shortest_route))
+                    # print(truck2.carried_without_going_to_hub)
+                    # print(truck2.time_left_hub)
+                    # print(self.delivery_time)
+                    # print(truck2.shortest_route)
+                    # print("\n")
                     if truck2.packages:
                         # packages_delivered = self.get_packages(truck2.currently_delivering_to, truck2)
                         for package in truck2.currently_delivering:
@@ -275,6 +289,8 @@ class Delivery_Distribution:
                     else:
                         if self.left_to_deliver > 0 and truck2.current_location != "HUB":
                             truck2.shortest_route.append("HUB")
+                            truck2.time_left_hub = self.delivery_time
+                            truck2.time_of_next_delivered = self.delivery_time + timedelta(seconds = self.route_time([truck2.current_location, "HUB"]))
                             truck2.current_location = "HUB"
                             truck2.carried_without_going_to_hub = 0
                         else:
@@ -395,10 +411,8 @@ class Delivery_Distribution:
                 packages = self.get_packages(location, truck)
 
                 need_to_go_to_hub_for_pickup = False
-                packaged_with_package = False
                 for package in packages:
                     if package.packageID in self.packaged_with_left:
-                        packaged_with_package = True
                         for package in self.packages:
                             if package.packageID in self.packaged_with_left:
                                 package.truck = truck.truckNum
@@ -469,7 +483,7 @@ class Delivery_Distribution:
             if truck.carried_without_going_to_hub + len(self.packaged_with_left) == truck.max_packages:
                 available = [package.address_Name for package in self.packages if package.packageID in self.packaged_with_left]
                 return available
-            
+
         for package in self.packages:
             if package.status == "Not Delivered" and (self.delivery_time + timedelta(seconds=self.route_time([truck.current_location, "HUB"]))>=package.available):
                 if int(package.truck) == 0 or int(package.truck) == int(truck.truckNum):
