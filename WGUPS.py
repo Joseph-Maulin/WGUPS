@@ -343,15 +343,16 @@ class Delivery_Distribution:
         # print(truck.truckNum, truck.carried_without_going_to_hub)
         # pprint(truck.locations)
 
-        truck_route = self.find_route(truck)
+        truck_route = self.find_route(truck, truck.locations)
 
-        # find if deadlines can be met with truck_route. cycle timer with only deadline_locations
-        deadline_locations = self.get_deadline_locations()
-        # print(deadline_locations)
-
-        self.deadlines_possible(truck.truckNum, deadline_locations, truck_route)
 
         if truck_route:
+            # find if deadlines can be met with truck_route. cycle timer with only deadline_locations
+            deadline_locations = self.get_deadline_locations()
+            # print(deadline_locations)
+
+            self.deadlines_possible(truck.truckNum, deadline_locations, truck_route)
+
             return self.add_route(truck, truck_route)
 
         else:
@@ -363,26 +364,30 @@ class Delivery_Distribution:
 
         if current_truck == 1:
             if "HUB" in truck_route[0]:
+                truck1.time_of_next_delivered = self.delivery_time + timedelta(self.route_time(truck_route[0]))
                 truck1.current_location = truck_route[0][-1]
             else:
+                truck1.time_of_next_delivered = self.delivery_time + timedelta(self.route_time([truck1.current_location, truck_route[0]]))
                 truck1.current_location = truck_route[0]
 
-            truck1.time_of_next_delivered = self.delivery_time + timedelta(self.route_time(truck_route[0]))
             truck1.carried_without_going_to_hub += len(truck_route[2])
 
         elif current_truck == 2:
             if "HUB" in truck_route[0]:
+                truck2.time_of_next_delivered = self.delivery_time + timedelta(self.route_time(truck_route[0]))
                 truck2.current_location = truck_route[0][-1]
+
             else:
+                truck2.time_of_next_delivered = self.delivery_time + timedelta(self.route_time([truck2.current_location, truck_route[0]]))
                 truck2.current_location = truck_route[0]
 
-            truck2.time_of_next_delivered = self.delivery_time + timedelta(self.route_time(truck_route[0]))
             truck2.carried_without_going_to_hub += len(truck_route[2])
 
 
         while deadline_locations:
-
-            if truck1.time_of_next_delivered < truck2.time_of_next_delivered
+            if truck1.time_of_next_delivered < truck2.time_of_next_delivered:
+                pass
+            break
 
 
     def add_route(self, truck, location):
@@ -424,7 +429,7 @@ class Delivery_Distribution:
 
         return delivery_time
 
-    def find_route(self, truck, deadline_locations=None):
+    def find_route(self, truck, locations):
 
         # packaged_with, delivery_deadline
 
@@ -446,12 +451,12 @@ class Delivery_Distribution:
         location_visited = [truck.current_location]
 
 
-        if truck.locations and truck.carried_without_going_to_hub <= truck.max_packages:
+        if locations and truck.carried_without_going_to_hub <= truck.max_packages:
             best_location = None
             best_ppd = 0
             truck_packages = []
 
-            for location in truck.locations:
+            for location in locations:
                 new_route = shortest_route[0] + [location]
                 packages = self.get_packages(location, truck)
 
