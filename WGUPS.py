@@ -326,11 +326,13 @@ class Delivery_Distribution:
     def add_route(self, truck, location):
 
         new_location = location[0]
+        hub_time = 0
         if "HUB" in location[0]:
             truck.time_left_hub = self.delivery_time
             new_location = new_location[1]
             truck.shortest_route.append("HUB")
             truck.carried_without_going_to_hub = 0
+            hub_time = self.route_time([truck.current_location, "HUB"])
 
         truck.current_location = new_location
         truck.locations.remove(truck.current_location)
@@ -353,7 +355,10 @@ class Delivery_Distribution:
         for package in location_packages:
             package.truck = truck.truckNum
             package.status = "Delivered"
-            package.delivered_time = self.delivery_time + timedelta(seconds=self.route_time(truck.shortest_route[-2:]))
+            if hub_time:
+                delivery_time = self.delivery_time + timedelta(seconds=hub_time + self.route_time(truck.shortest_route[-2:]))
+            else:
+                delivery_time = self.delivery_time + timedelta(seconds=self.route_time(truck.shortest_route[-2:]))
 
 
     def find_route(self, truck):
