@@ -409,35 +409,43 @@ class Delivery_Distribution:
                 if package.packageID in deadline_packages:
                     deadline_packages.remove(package.packageID)
 
+        print(deadline_locations)
+        print("\n")
 
 
+        packaged_with_check = False
         while deadline_packages:
-            # print(f"deadline_packages: {deadline_packages}")
-            # print(deadline_locations)
-            # print("\n")
-            # print(truck1.time_of_next_delivered, truck2.time_of_next_delivered)
+
+            # print("cycle")
             # print(f"deadline_packages: {deadline_packages}")
             # print(f"deadline_locations: {deadline_locations}")
+            print("\n")
+            print(truck1.shortest_route)
+            print(truck1.time_of_next_delivered)
+            print(truck2.shortest_route)
+            print(truck2.time_of_next_delivered)
+
             #
             # print(truck1.time_of_next_delivered, truck2.time_of_next_delivered)
 
             if truck1.carried_without_going_to_hub + len(self.packaged_with_left) > truck1.max_packages:
+                print("overload")
+                packaged_with_check = True
                 truck1.carried_without_going_to_hub = 0
-                truck1.shortest_route.append("HUB")
                 packaged_with_left_route = [x.address_Name for x in self.packages["Not Delivered"] if x.packageID in self.packaged_with_left]
                 new_route = [truck1.current_location] + packaged_with_left_route + ["HUB"]
+                truck1.shortest_route += new_route
                 truck1.time_of_next_delivered += timedelta(seconds = self.route_time(new_route))
                 truck1.current_location = "HUB"
 
-                for x in self.packaged_with_left:
-                    if x in deadline_packages:
-                        deadline_packages.remove(x)
-                        for y in self.lookup_package(packageID=x):
-                            deadline_locations.remove(y.address_Name)
-
 
             elif truck1.time_of_next_delivered < truck2.time_of_next_delivered:
-                route = self.find_route(truck1, deadline_locations)
+                if not packaged_with_check:
+                    print(truck1.carried_without_going_to_hub + len(self.packaged_with_left))
+                    route = self.find_route(truck1, deadline_locations, packaged_with_left = self.packaged_with_left)
+                else:
+                    route = self.find_route(truck1, deadline_locations)
+
                 if not route:
                     route = self.find_route(truck2, deadline_locations)
                     deadline_locations, deadline_packages = self.deadline_cycle(truck2, route, deadline_locations, deadline_packages)
@@ -467,7 +475,7 @@ class Delivery_Distribution:
     def deadline_cycle(self, truck, route, deadline_locations, deadline_packages):
 
         if "HUB" in route[0]:
-            truck.shortest_route + route[0]
+            truck.shortest_route += route[0]
             truck.carried_without_going_to_hub = 0
             hub_time = self.route_time([truck.current_location, "HUB"])
             truck.time_left_hub = truck.time_of_next_delivered + timedelta(seconds=hub_time)
