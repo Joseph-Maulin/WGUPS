@@ -30,10 +30,8 @@ def longest_common_substring(str1, str2):
 
 # print(longest_common_substring("hello", "jello"))
 
-l = ["A", "B"] + ["C"]
+l = [1,2 ] + ["C"]
 
-l.remove("A")
+l.remove(1)
 
-
-if type(l) == list:
-    print('list')
+print(l)
