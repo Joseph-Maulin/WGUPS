@@ -40,7 +40,7 @@ packages = {1: {"Address":"195 W Oakland Ave", "City":"Salt Lake City", "Zip":"8
             40: {"Address":"380 W 2880 S", "City":"Salt Lake City", "Zip":"84115", "Delivery_Deadline":"10:30", "Weight":"45"}
             }
 
-            # 14 15 19 16 13 20
+            # 13 14 15 16 19 20
 
 class Distances:
 
