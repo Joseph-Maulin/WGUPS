@@ -312,6 +312,14 @@ class Delivery_Distribution:
         return deadlines_not_met
 
 
+    def shuffle_for_deadlines(self):
+        # for packages in deadlines_not_met
+        # check truck
+        # swap locations and check shortest_route. Choose least impacted swap
+
+        pass
+
+
     def print_route_results(self):
 
         # pprint(self.packages)
