@@ -299,7 +299,12 @@ class Delivery_Distribution:
                 # print(self.delivery_time, [{x:y.delivery_time} for x,y in self.packages["Delivered"].items() if x in self.packages_with_deadlines])
                 # print("\n")
 
-        print(f"deadlines: {self.check_if_met_deadlines()}")
+        deadlines_not_met = self.check_if_met_deadlines()
+        print(f"deadlines: {deadlines_not_met}")
+
+        if deadlines_not_met:
+            self.shuffle_for_deadlines(deadlines_not_met)
+
         self.print_route_results()
 
     def check_if_met_deadlines(self):
