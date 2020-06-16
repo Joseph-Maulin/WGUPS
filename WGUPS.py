@@ -123,6 +123,10 @@ class Delivery_Distribution:
         self.trucks = trucks  :  Array of Truck objects in the system.
         self.delivery_time = datetime(2020,5,29,8,0,0)  :  Time of day. Start 8:00
         self.end_time = self.delivery_time + timedelta(hours=9)  :  End of day.
+        self.packaged_with_left = [13, 14, 15, 16, 19, 20]  : packages that have to be picked up together
+        self.packaged_with_truck = 0  :  Truck that is carrying the packages_with_left packages
+        self.packages_with_deadlines = []  :  packages that have deadlines earlier than end of day (self.end_time)
+
 
     Methods
     ________
@@ -135,11 +139,35 @@ class Delivery_Distribution:
         lookup_status(self, packageID)
             -- lookup package status givin ID
 
-        cycle_timer(self)
-            -- simulates day
+        set_truck_routes(self)
+            -- sets truck routes
+
+        check_if_met_deadlines(self)
+            -- checks if package delivery_times are made on or before package deadlines
+
+        shuffle_for_deadlines(self, deadlines_not_met)
+            -- rearrange route so deadlines are met
+
+        route_is_valid(self, route, truck)
+            -- checks if shuffled route is valid
+
+        get_deadline(self, deadline_packages)
+            -- get minimum deadline to meet for group of packages
 
         get_truck_routes(self, truck)
             -- finds optimal route and adds for givin truck
+
+        print_route_results(self)
+            -- print package status by delivery times and final routes and distances
+
+        print_status(self)
+            -- print package status by delivery times
+
+        find_and_deliver(self, truck)
+            -- establish next delivery location for passed truck
+
+        get_truck_routes(self, truck)
+            -- get possible locations, run search, add to route
 
         add_route(self, truck, location)
             -- adds route to truck, updates truck and package information
@@ -150,11 +178,14 @@ class Delivery_Distribution:
         get_packages(self, location, truck)
             -- return valid packages for truck at location
 
-        get_route_distance(self, route)
-            -- return distance of passed route
-
         get_available_locations(self, truck)
             -- return available locations passed truck
+
+        get_deadline_locations(self, deadline_packages)
+            -- get address_Name(s) for deadline_packages not delivered
+
+        get_route_distance(self, route)
+            -- return distance of passed route
 
         route_time(self, route)
             -- return time it takes to complete route
@@ -253,7 +284,7 @@ class Delivery_Distribution:
 
         return packages_with_deadlines
 
-    def cycle_timer(self):
+    def set_truck_routes(self):
         self.packages_with_deadlines = self.get_packages_with_deadlines()
         self.left_to_deliver = len(self.packages["Not Delivered"])
 
@@ -665,4 +696,4 @@ if __name__ == "__main__":
                        )
 
 
-    dd.cycle_timer()
+    dd.set_truck_routes()
