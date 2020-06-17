@@ -106,7 +106,7 @@ Distances = Distances()
               > prints the delivery status of all packages at each delivery time chronologically
 
 
-  > helper_functions
+  > helper_methods
       > lookup_package
           > lookup package by any package class variables
 
@@ -130,3 +130,30 @@ Distances = Distances()
 
       > route_time
           > get time to complete route in seconds. Based of distance/truck speed
+
+
+## Evaluate space-time complexity using Big O notation throughout the coding and for the entire program.
+
+
+# Discuss the ability of your solution to adapt to a changing market and to scalability.
+
+  This solution is fairly adaptable. The distance data and locations can be
+  easily swapped with another set. The solution is adaptable to changes that
+  can occur during daily execution since it is finding the next route location
+  bit by bit instead of locking in a set route. Finally I believe it can be scaled
+  without problem since any additions are just more objects being added. Searches
+  through Delivery_Distribution.packages have a reduction in O(n) as the program
+  finds routes.
+
+# Discuss the efficiency and maintainability of the software.
+
+  Efficiency --
+
+  The code set should be easy to maintain due to the object oriented design.
+  Functionality can be added or adjusted to certain methods without drastically
+  effecting other method processes
+
+
+# Discuss the self-adjusting data structures chosen and their strengths and weaknesses based on the scenario.
+
+  
