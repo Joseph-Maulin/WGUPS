@@ -307,18 +307,18 @@ class Delivery_Distribution:
             else:
                 self.find_and_deliver(self.truck2)
 
+            deadlines_not_met = self.check_if_met_deadlines()
+
+
+            if deadlines_not_met:
+                self.shuffle_for_deadlines(deadlines_not_met)
+
+
             if self.left_to_deliver == 0:
                 break
             else:
                 self.delivery_time = min(self.truck1.time_of_next_delivered, self.truck2.time_of_next_delivered)
 
-
-        deadlines_not_met = self.check_if_met_deadlines()
-        print(f"deadlines: {deadlines_not_met}")
-
-
-        if deadlines_not_met:
-            self.shuffle_for_deadlines(deadlines_not_met)
 
         self.print_route_results()
 
@@ -359,7 +359,7 @@ class Delivery_Distribution:
             route.remove(deadline_location)
             delivery_time = datetime(2020,5,29,8,0,0)
 
-            finish_index = -1
+            finish_index = len(route)
             for i in range(len(route)-1):
                 seg = [route[i], route[i+1]]
                 delivery_time += timedelta(seconds=self.route_time(seg))
@@ -387,7 +387,24 @@ class Delivery_Distribution:
                         distance = test_distance
                         best_route = test_route
 
+
+            # print(truck.shortest_route)
+            truck.current_location =  best_route[-1]
             truck.shortest_route = best_route
+            self.adjust_delivery_times(truck)
+
+    def adjust_delivery_times(self, truck):
+
+        delivery_time = datetime(2020,5,29,8,0,0)
+        for i in range(1,len(truck.shortest_route)):
+            route_seg = [truck.shortest_route[i-1], truck.shortest_route[i]]
+            delivery_time += timedelta(seconds = self.route_time(route_seg))
+            if truck.shortest_route[i] == "HUB":
+                continue
+            else:
+                packages = self.get_packages(truck.shortest_route[i], truck, package_search="Delivered")
+                for package in packages:
+                    package.delivered_time = delivery_time
 
 
     def route_is_valid(self, route, truck):
@@ -537,7 +554,19 @@ class Delivery_Distribution:
         truck.currently_delivering_to = new_location
 
         location_packages = location[2]
+        if hub_time:
+            delivery_time = self.delivery_time + timedelta(seconds=hub_time + self.route_time(truck.shortest_route[-2:]))
+        else:
+            delivery_time = self.delivery_time + timedelta(seconds=self.route_time(truck.shortest_route[-2:]))
+
         for package in location_packages:
+
+            package.truck = truck.truckNum
+            package.status = "Delivered"
+            self.packages["Not Delivered"].pop(package.packageID)
+            self.packages["Delivered"][package.packageID] = package
+            self.packages["Delivered"][package.packageID].delivery_time = delivery_time
+
             if package.packageID in self.packaged_with_left:
                 for x, y in self.packages["Not Delivered"].items():
                     if x in self.packaged_with_left:
@@ -550,17 +579,17 @@ class Delivery_Distribution:
         truck.packages_delivered += len(location_packages)
         self.left_to_deliver -= len(location_packages)
         truck.carried_without_going_to_hub += len(location_packages)
-        for package in location_packages:
-            if hub_time:
-                delivery_time = self.delivery_time + timedelta(seconds=hub_time + self.route_time(truck.shortest_route[-2:]))
-            else:
-                delivery_time = self.delivery_time + timedelta(seconds=self.route_time(truck.shortest_route[-2:]))
-
-            package.truck = truck.truckNum
-            package.status = "Delivered"
-            self.packages["Not Delivered"].pop(package.packageID)
-            self.packages["Delivered"][package.packageID] = package
-            self.packages["Delivered"][package.packageID].delivery_time = delivery_time
+        # # for package in location_packages:
+        # #     if hub_time:
+        # #         delivery_time = self.delivery_time + timedelta(seconds=hub_time + self.route_time(truck.shortest_route[-2:]))
+        # #     else:
+        # #         delivery_time = self.delivery_time + timedelta(seconds=self.route_time(truck.shortest_route[-2:]))
+        #
+        #     package.truck = truck.truckNum
+        #     package.status = "Delivered"
+        #     self.packages["Not Delivered"].pop(package.packageID)
+        #     self.packages["Delivered"][package.packageID] = package
+        #     self.packages["Delivered"][package.packageID].delivery_time = delivery_time
 
         return delivery_time
 

@@ -133,6 +133,90 @@ Distances = Distances()
 
 
 ## Evaluate space-time complexity using Big O notation throughout the coding and for the entire program.
+  p = number of packages
+  r = length of truck route
+  l = locations
+
+  add_package - O(p)
+
+  lookup_package - O(p)
+
+  lookup_status - O(1)
+
+  get_packages_with_deadlines - O(p)
+
+  set_truck_routes - O(p + l*(l*2p + r + p**2 + p + r**2 + r*p + p) + l*p + r)
+                        --> O(l**2*p + p**2 + r**2 + r*p)
+
+                     O(p) packages_with_deadlines
+                     O(l*2p + r + p**2) find_and_deliver
+                     O(p) check_if_met_deadlines
+                     O(r**2 + r*p + p) shuffle_for_deadlines
+                     O(l*p + r) print_route_results
+
+  check_if_met_deadlines - O(p)
+
+  shuffle_for_deadlines - O(2r+2p+r*(r*p+p))
+                            -> O(r+p+r**2p+r*p)
+                            -> O(r**2 + r*p + p)
+
+                          O(1) deadlines_not_met
+                          O(r) index shortest_route
+                          O(p) get_packages
+                          O(p) get_deadline
+                          O(r) for i in range(len(route)-1)
+                          O(r) for i in range(1, finish_index)
+                          O(r*p) route_is_valid
+                          o(r) get_route_distance
+
+  route_is_valid - O(p + r*(2p)) => O(r*p)
+                   O(p) get packages with deadlines
+                   O(r) route length
+                   O(p) get_packages
+                   O(p) location_packages
+
+  get_deadline - O(p)
+
+  print_route_results - O(l*p + 4r) -> O(l*p + r)
+                        O(l*p) for print_status
+                        O(r) for get_route_distance
+
+  print_status -  O(p + l*(2p)) -> O(l*p)
+
+  find_and_deliver - O(16 + l*p**2 + r+2) -> O(l*p**2 + r)
+                     O(16) c in currently_delivering max of 16
+                     O(l*2p + r + p**2) g in get_truck_routes
+                     O(2) - route_time constant size of 2
+
+  get_truck_routes - O(p + l*2p + r + p**2)
+                        -> O(l*2p + r + p**2)
+
+                     O(p) get_available_locations
+                     O(l*2p) find_route
+                     O(r + p**2) add_route
+
+  add_route - O(r + p**2)
+              O(r) route_time n for n in shortest_route
+              O(p) package in location_packages
+              O(p) packages["Not Delivered"]
+
+  find_route - O(l*p**2*2) -> O(l*p**2)
+               O(l) location in locations
+               O(p) get_packages()
+               O(p) package in get_packages()
+               O(2) r in get_route_distance(new_route) new_route constant 2
+
+  get_packages - O(p)
+
+  get_available_locations - O(p)
+
+  get_deadline_locations - O(p)
+
+  get_route_distance - O(r)
+
+  route_time = O(r)
+
+
 
 
 # Discuss the ability of your solution to adapt to a changing market and to scalability.
@@ -147,13 +231,21 @@ Distances = Distances()
 
 # Discuss the efficiency and maintainability of the software.
 
-  Efficiency --
+  The efficiency is quadratic, but n's scale down as packages are delivered
+  due to the dictionary access of self.packages. Also some worst case
+  scenarios are factored in such as all packages being deadlined before
+  end of day.
 
   The code set should be easy to maintain due to the object oriented design.
-  Functionality can be added or adjusted to certain methods without drastically
-  effecting other method processes
+  Functionality can be added or adjusted to certain methods without drastically effecting other method processes.
 
 
 # Discuss the self-adjusting data structures chosen and their strengths and weaknesses based on the scenario.
 
-  
+  Locations are added to routes in cycles. So any changes that occur with
+  packages during the day will be taken into account during the routing process.
+
+  The main strengths are flexibility, ease of changes, and speed of
+  processing.
+
+  The main weaknesses are having less efficient routing than possible.
