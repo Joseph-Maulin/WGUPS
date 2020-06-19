@@ -12,7 +12,7 @@ packages = {1: {"Address":"195 W Oakland Ave", "City":"Salt Lake City", "Zip":"8
             12: {"Address":"3575 W Valley Central Station bus Loop", "City":"West Valley City", "Zip":"84119", "Delivery_Deadline":"EOD", "Weight":"1"},
             13: {"Address":"2010 W 500 S", "City":"Salt Lake City", "Zip":"84104", "Delivery_Deadline":"10:30", "Weight":"2"},
             14: {"Address":"4300 S 1300 E", "City":"Millcreek", "Zip":"84117", "Delivery_Deadline":"10:30", "Weight":"88", "Packaged With":[15,19]},
-            15: {"Address":"4580 S 2300 E", "City":"Holladay", "Zip":"84117", "Delivery_Deadline":"8:30", "Weight":"4"},
+            15: {"Address":"4580 S 2300 E", "City":"Holladay", "Zip":"84117", "Delivery_Deadline":"9:00", "Weight":"4"},
             16: {"Address":"4580 S 2300 E", "City":"Holladay", "Zip":"84117", "Delivery_Deadline":"10:30", "Weight":"88", "Packaged With":[13,19]},
             17: {"Address":"3148 S 1100 W", "City":"Salt Lake City", "Zip":"84119", "Delivery_Deadline":"EOD", "Weight":"2"},
             18: {"Address":"1488 4800 S", "City":"Salt Lake City", "Zip":"84123", "Delivery_Deadline":"EOD", "Weight":"6", "Truck":2},
@@ -37,7 +37,7 @@ packages = {1: {"Address":"195 W Oakland Ave", "City":"Salt Lake City", "Zip":"8
             37: {"Address":"410 S State St", "City":"Salt Lake City", "Zip":"84111", "Delivery_Deadline":"10:30", "Weight":"2"},
             38: {"Address":"410 S State St", "City":"Salt Lake City", "Zip":"84111", "Delivery_Deadline":"EOD", "Weight":"9", "Truck":2},
             39: {"Address":"2010 W 500 S", "City":"Salt Lake City", "Zip":"84104", "Delivery_Deadline":"EOD", "Weight":"9"},
-            40: {"Address":"380 W 2880 S", "City":"Salt Lake City", "Zip":"84115", "Delivery_Deadline":"8:30", "Weight":"45"}
+            40: {"Address":"380 W 2880 S", "City":"Salt Lake City", "Zip":"84115", "Delivery_Deadline":"10:30", "Weight":"45"}
             }
 
             # 13 14 15 16 19 20

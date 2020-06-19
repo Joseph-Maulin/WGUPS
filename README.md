@@ -93,6 +93,9 @@ Distances = Distances()
       > insert route location into truck.shortest_route and run route_is_valid check
       > updates truck.shortest_route to the most efficient rearrangement
 
+          > adjust_delivery_times
+              > recalculates package delivery times for shuffled route
+
           > route_is_valid
               > checks if route meets all constraints
               > deadlines met, packged_with, max_packages
@@ -145,29 +148,34 @@ Distances = Distances()
 
   get_packages_with_deadlines - O(p)
 
-  set_truck_routes - O(p + l*(l*2p + r + p**2 + p + r**2 + r*p + p) + l*p + r)
-                        --> O(l**2*p + p**2 + r**2 + r*p)
+  set_truck_routes - O(p + l*(l*2p + r + p**2 + p + r**3) + l*p + r)
+                        --> O(l**2*p + p**2 + r**3 + r*p)
 
                      O(p) packages_with_deadlines
                      O(l*2p + r + p**2) find_and_deliver
                      O(p) check_if_met_deadlines
-                     O(r**2 + r*p + p) shuffle_for_deadlines
+                     O(r**3) shuffle_for_deadlines
                      O(l*p + r) print_route_results
 
   check_if_met_deadlines - O(p)
 
-  shuffle_for_deadlines - O(2r+2p+r*(r*p+p))
-                            -> O(r+p+r**2p+r*p)
-                            -> O(r**2 + r*p + p)
+  shuffle_for_deadlines - O(2r+2p+r*(r*(r*p+r*p+r+p+r*p+p)))
+                            -> O(2r+2p+r*(r*(r*p)))
+                            -> O(2r+2p + r**3)
+                            -> O(r**3)
 
                           O(1) deadlines_not_met
                           O(r) index shortest_route
                           O(p) get_packages
                           O(p) get_deadline
                           O(r) for i in range(len(route)-1)
+                          O(r) while best_route == None and cycles>0
                           O(r) for i in range(1, finish_index)
+                          O(r*p) adjust_delivery_times
                           O(r*p) route_is_valid
                           o(r) get_route_distance
+
+  adjust_delivery_times - O(r*p)
 
   route_is_valid - O(p + r*(2p)) => O(r*p)
                    O(p) get packages with deadlines
@@ -226,7 +234,7 @@ Distances = Distances()
   can occur during daily execution since it is finding the next route location
   bit by bit instead of locking in a set route. Finally I believe it can be scaled
   without problem since any additions are just more objects being added. Searches
-  through Delivery_Distribution.packages have a reduction in O(n) as the program
+  through Delivery_Distribution.packages have a reduction in n as the program
   finds routes.
 
 # Discuss the efficiency and maintainability of the software.
@@ -244,6 +252,7 @@ Distances = Distances()
 
   Locations are added to routes in cycles. So any changes that occur with
   packages during the day will be taken into account during the routing process.
+
 
   The main strengths are flexibility, ease of changes, and speed of
   processing.

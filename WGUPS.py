@@ -148,6 +148,9 @@ class Delivery_Distribution:
         shuffle_for_deadlines(self, deadlines_not_met)
             -- rearrange route so deadlines are met
 
+        adjust_delivery_times(self, truck)
+            -- adjust shuffled route package delivery time
+
         route_is_valid(self, route, truck)
             -- checks if shuffled route is valid
 
@@ -311,8 +314,12 @@ class Delivery_Distribution:
             print(f"deadlines_not_met: {deadlines_not_met}")
 
 
+            success=True
             if deadlines_not_met:
-                self.shuffle_for_deadlines(deadlines_not_met)
+                success = self.shuffle_for_deadlines(deadlines_not_met)
+
+            if not success:
+                print("route deadlines cannot be met")
 
 
             if self.left_to_deliver == 0:
@@ -372,32 +379,55 @@ class Delivery_Distribution:
 
             distance = -1
             best_route = None
-            for i in range(1, finish_index):
-                test_route = route[:]
-                test_route.insert(i, deadline_location)
+            cycles = len(route)
+            while best_route == None and cycles>0:
+                for i in range(1, finish_index):
+                    test_route = route[:]
+                    test_route.insert(i, deadline_location)
+                    truck.shortest_route = test_route
+                    self.adjust_delivery_times(truck)
 
-                if self.route_is_valid(test_route, truck):
+                    if self.route_is_valid(test_route, truck):
 
-                    test_distance = self.get_route_distance(test_route)
+                        test_distance = self.get_route_distance(test_route)
 
-                    if distance == -1:
-                        distance = test_distance
-                        best_route =  test_route
+                        if distance == -1:
+                            distance = test_distance
+                            best_route =  test_route
 
-                    elif distance > test_distance:
-                        distance = test_distance
-                        best_route = test_route
+                        elif distance > test_distance:
+                            distance = test_distance
+                            best_route = test_route
 
-            # TODO
-            if best_route == None:
-                self.move_last_available_back(route, finish_index)
-            print(truck.shortest_route)
-            truck.current_location =  best_route[-1]
-            truck.shortest_route = best_route
-            self.adjust_delivery_times(truck)
+                if not best_route:
+                    packages_with_deadlines = self.get_packages_with_deadlines(package_search="Delivered")
 
-    def move_last_available_back(self, route, finish_index):
-        print(route[finish_index-1])
+                    delivery_time = datetime(2020,5,29,8,0,0)
+                    for i in range(1, len(route)):
+                        delivery_time += timedelta(seconds=self.route_time([route[i-1], route[i]]))
+
+                        location_packages = self.get_packages(route[i], truck, package_search="Delivered")
+
+                        for package in location_packages:
+                            if package.packageID in packages_with_deadlines and package.delivery_deadline + timedelta(seconds=self.route_time([deadline_location, package.address_Name])) > delivery_time:
+                                if i>1:
+                                    temp = route[i-1]
+                                    route[i-1] = route[i]
+                                    route[i] = temp
+
+                cycles-=1
+
+            if not best_route:
+                print("route_not_possible")
+                return False
+
+            else:
+                print("route_adjusted")
+                truck.current_location =  best_route[-1]
+                truck.shortest_route = best_route
+                self.adjust_delivery_times(truck)
+                return True
+
 
     def adjust_delivery_times(self, truck):
 
@@ -410,7 +440,7 @@ class Delivery_Distribution:
             else:
                 packages = self.get_packages(truck.shortest_route[i], truck, package_search="Delivered")
                 for package in packages:
-                    print(package.address_Name, delivery_time)
+                    # print(package.address_Name, delivery_time)
                     package.delivery_time = delivery_time
 
 
@@ -446,6 +476,7 @@ class Delivery_Distribution:
             if packagesNum > 16:
                 return False
 
+        print("route is valid")
         return True
 
 
