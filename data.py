@@ -37,7 +37,7 @@ packages = {1: {"Address":"195 W Oakland Ave", "City":"Salt Lake City", "Zip":"8
             37: {"Address":"410 S State St", "City":"Salt Lake City", "Zip":"84111", "Delivery_Deadline":"10:30", "Weight":"2"},
             38: {"Address":"410 S State St", "City":"Salt Lake City", "Zip":"84111", "Delivery_Deadline":"EOD", "Weight":"9", "Truck":2},
             39: {"Address":"2010 W 500 S", "City":"Salt Lake City", "Zip":"84104", "Delivery_Deadline":"EOD", "Weight":"9"},
-            40: {"Address":"380 W 2880 S", "City":"Salt Lake City", "Zip":"84115", "Delivery_Deadline":"8:50", "Weight":"45"}
+            40: {"Address":"380 W 2880 S", "City":"Salt Lake City", "Zip":"84115", "Delivery_Deadline":"8:30", "Weight":"45"}
             }
 
             # 13 14 15 16 19 20

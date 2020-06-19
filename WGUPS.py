@@ -308,6 +308,7 @@ class Delivery_Distribution:
                 self.find_and_deliver(self.truck2)
 
             deadlines_not_met = self.check_if_met_deadlines()
+            print(f"deadlines_not_met: {deadlines_not_met}")
 
 
             if deadlines_not_met:
@@ -387,11 +388,16 @@ class Delivery_Distribution:
                         distance = test_distance
                         best_route = test_route
 
-
-            # print(truck.shortest_route)
+            # TODO
+            if best_route == None:
+                self.move_last_available_back(route, finish_index)
+            print(truck.shortest_route)
             truck.current_location =  best_route[-1]
             truck.shortest_route = best_route
             self.adjust_delivery_times(truck)
+
+    def move_last_available_back(self, route, finish_index):
+        print(route[finish_index-1])
 
     def adjust_delivery_times(self, truck):
 
@@ -404,7 +410,8 @@ class Delivery_Distribution:
             else:
                 packages = self.get_packages(truck.shortest_route[i], truck, package_search="Delivered")
                 for package in packages:
-                    package.delivered_time = delivery_time
+                    print(package.address_Name, delivery_time)
+                    package.delivery_time = delivery_time
 
 
     def route_is_valid(self, route, truck):
