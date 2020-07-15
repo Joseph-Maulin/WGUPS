@@ -1,4 +1,78 @@
 
+# Created by Joseph Maulin WGU Student ID: 001118042
+
+
+# Algorithm overview
+
+To solve this routing system requirements I adapted Dijkstra's Algorithm. I have
+an object oriented setup with Truck, Package, and Delivery_Distribution classes. This way
+each object can easily contain all the variables they need to throughout the execution.
+
+Packages are read from the data.py file, initialized, and loaded into the Delivery_Distribution
+object. The data variables are in a dictionary and the Distances are in a json format listing
+distances between each of the locations.
+
+The main code flow is as follows. I have opted for a greedy version of Dijkstra's Algorithm.
+The purpose being that two trucks are operating simultaneously. The truck with the next available
+open time searches for the next package delivery location. The available locations are
+filtered by whether that truck is eligible. This is based on whether the location has non-delivered
+or in route packages, packaged with packages responsibility, and truck number requirements,
+and package availability. Then I use a greedy approach where the locations are the nodes and it chooses
+the best packages delivered per mile as the node number. The location is then added to the truck.
+The route is then checked to see if any deadlines would not be met and rearranges the route if necessary.
+When the truck routes are finalized I print out the times when a delivery has occurred and the delivery status
+of the packages at that time. I have included travel times back to the delivery "HUB" during routing.
+Delivery times themselves are tracked in each package object. Finally I go into a user interface where
+individual package details can be examined or package statuses can be seen at a certain time.
+
+
+# Discuss the ability of your solution to adapt to a changing market and to scalability.
+
+  This solution is fairly adaptable. The distance data and locations can be
+  easily swapped with another set. The data variables and distances to other locations
+  used in this adaption are in json format. It seems reasonable that data would be collected
+  to use in that form for a different set. The solution is adaptable to changes that
+  can occur during daily execution since it is finding the next route location
+  one by one instead of locking in a set route. I have also included route rearrangements
+  if deadlines are not met. Also Finally I believe it can be scaled
+  without problem since any additions are just additions to the json input. Thinking about
+  scalability as well I have reductions in location searches based on truck eligibility.
+  Also there is a reduction in n of package searches during the program as packages delivered
+  are moved into a separate dictionary key.
+
+# Discuss the efficiency and maintainability of the software.
+
+  The efficiency is quadratic, but n's scale down as packages are delivered
+  due to the dictionary access of self.packages. Also some worst case
+  scenarios are factored in such as all packages being deadlined before
+  end of day.
+
+  The code set should be easy to maintain due to the object oriented design.
+  Functionality can be added or adjusted to certain methods without drastically effecting other method processes.
+
+
+# Discuss the self-adjusting data structures chosen and their strengths and weaknesses based on the scenario.
+
+  Locations are added to truck routes in cycles. The self-adjusting aspect in this solution
+  checks if any package delivery deadlines would be missed by this addition. If so, I have
+  written a code segment to reorder that truck route (shuffle_for_deadlines) to the most
+  efficient rearrangement that meets all deadlines.
+
+  The strength is that a location can be moved around to meet delivery deadlines without
+  adding a lot of time complexity to the solution. Otherwise routing would have to have
+  simulated lookaheads on each cycle. These would be exponential since you are also looking
+  for the least amount of distance travelled. So you would essentially have to simulate all
+  possibilities, check if deadlines are met, and look for the most efficient. This seems like
+  a reasonable less intensive middle ground solution.
+
+  A weaknesses of this solution are that the solution's time complexity is based on
+  the length of the current route of locations. So rearrangements later in the day become
+  more intensive. Each truck route length is lowered with each other truck in service though.
+  Another is that if this was to become a real time live service. Package delivery times
+  would need to be calculated from "HUB" to "HUB" to get accurate delivery times for packages
+  beforehand.
+
+
 
 # Initiate:
   > initialize Distances object from data.py
@@ -223,38 +297,3 @@ Distances = Distances()
   get_route_distance - O(r)
 
   route_time = O(r)
-
-
-
-
-# Discuss the ability of your solution to adapt to a changing market and to scalability.
-
-  This solution is fairly adaptable. The distance data and locations can be
-  easily swapped with another set. The solution is adaptable to changes that
-  can occur during daily execution since it is finding the next route location
-  bit by bit instead of locking in a set route. Finally I believe it can be scaled
-  without problem since any additions are just more objects being added. Searches
-  through Delivery_Distribution.packages have a reduction in n as the program
-  finds routes.
-
-# Discuss the efficiency and maintainability of the software.
-
-  The efficiency is quadratic, but n's scale down as packages are delivered
-  due to the dictionary access of self.packages. Also some worst case
-  scenarios are factored in such as all packages being deadlined before
-  end of day.
-
-  The code set should be easy to maintain due to the object oriented design.
-  Functionality can be added or adjusted to certain methods without drastically effecting other method processes.
-
-
-# Discuss the self-adjusting data structures chosen and their strengths and weaknesses based on the scenario.
-
-  Locations are added to routes in cycles. So any changes that occur with
-  packages during the day will be taken into account during the routing process.
-
-
-  The main strengths are flexibility, ease of changes, and speed of
-  processing.
-
-  The main weaknesses are having less efficient routing than possible.

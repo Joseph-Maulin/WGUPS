@@ -3,7 +3,6 @@
 # group packages that have to be delivered
 # prioritize delivery_deadlines
 from data import packages, Distances
-import time
 from datetime import timedelta, time, datetime
 from pprint import pprint
 from copy import deepcopy
@@ -162,6 +161,9 @@ class Delivery_Distribution:
 
         print_route_results(self)
             -- print package status by delivery times and final routes and distances
+
+        end_lookups(self)
+            -- user interface to look up package data and delivery details
 
         print_status(self)
             -- print package status by delivery times
@@ -504,6 +506,38 @@ class Delivery_Distribution:
         print(f"truck2 packages_delivered: {self.truck2.packages_delivered}")
 
         print(f"\ntotal distance: {self.get_route_distance(self.truck1.shortest_route) + self.get_route_distance(self.truck2.shortest_route)}")
+
+
+        self.end_lookups()
+
+
+    def end_lookups(self):
+
+        print("\n")
+
+        while True:
+
+            try:
+                print("Check package details by packageID or see all status at specified time")
+                prompt = str(input("(ex. 1 or 8:30, enter q to quit): "))
+
+                if ":" in prompt:
+                    hour = int(prompt[0:prompt.find(":")])
+                    minutes = int(prompt[prompt.find(":")+1:])
+                    check_time = datetime(2020,5,29,hour,minutes,0)
+                    package_details = get_package_details(check_time)
+
+                else:
+                    package = self.lookup_package(packageID=int(prompt))
+                    print(package)
+
+            except:
+                print("\n invalid input..\n")
+
+    def get_package_details(self, check_time):
+
+        # go through packages
+
 
 
     def print_status(self):
