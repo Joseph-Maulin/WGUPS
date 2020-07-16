@@ -517,26 +517,72 @@ class Delivery_Distribution:
 
         while True:
 
-            try:
-                print("Check package details by packageID or see all status at specified time")
-                prompt = str(input("(ex. 1 or 8:30, enter q to quit): "))
+            # try:
+            print("Check package details by packageID or see all status at specified time")
+            prompt = str(input("(ex. 1 or 8:30, enter q to quit): "))
 
-                if ":" in prompt:
-                    hour = int(prompt[0:prompt.find(":")])
-                    minutes = int(prompt[prompt.find(":")+1:])
-                    check_time = datetime(2020,5,29,hour,minutes,0)
-                    package_details = get_package_details(check_time)
+            if ":" in prompt:
+                hour = int(prompt[0:prompt.find(":")])
+                minutes = int(prompt[prompt.find(":")+1:])
+                check_time = datetime(2020,5,29,hour,minutes,0)
+                package_details = self.get_package_details(check_time, self.truck1) + self.get_package_details(check_time, self.truck2)
+                print("\n")
+                for package in package_details:
+                    print(package.packageID, package.status, package.delivery_time)
+
+                print("\n")
+
+            else:
+                package = self.lookup_package(packageID=int(prompt))
+                package.status = "Delivered"
+                print("\n", package, "\n")
+
+            # except Exception as e:
+            #     print(e)
+            #     print("\n invalid input..\n")
+
+
+    def get_package_details(self, check_time, truck):
+
+        # go through truck route and set delivered for all packages before check_time.
+        # if after go until "HUB" and set to "out for delivery"
+        current_time = datetime(2020,5,29,8,0,0)
+        packages = self.packages["Delivered"]
+        passed_hub = False
+        packages_at_time = []
+
+        for i in range(1,len(truck.shortest_route)):
+
+            location = truck.shortest_route[i]
+            current_time =  current_time + timedelta(seconds=self.route_time([truck.shortest_route[i-1], location]))
+            # print("get_package", location, current_time)
+
+            if current_time > check_time and not passed_hub:
+                if location == "HUB":
+                    passed_hub = True
+                    continue
 
                 else:
-                    package = self.lookup_package(packageID=int(prompt))
-                    print(package)
+                    location_packages = self.get_packages(location, truck, package_search="Delivered")
+                    for package in location_packages:
+                        package.status = "Out For Delivery"
+                        packages_at_time.append(package)
 
-            except:
-                print("\n invalid input..\n")
+            elif current_time > check_time and passed_hub:
+                # set not delivered
+                location_packages = self.get_packages(location, truck, package_search="Delivered")
+                for package in location_packages:
+                    package.status = "Not Delivered"
+                    packages_at_time.append(package)
 
-    def get_package_details(self, check_time):
+            else:
+                # set delivered
+                location_packages = self.get_packages(location, truck, package_search="Delivered")
+                for package in location_packages:
+                    package.status = "Delivered"
+                    packages_at_time.append(package)
 
-        # go through packages
+        return packages_at_time
 
 
 
