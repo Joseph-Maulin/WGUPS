@@ -525,11 +525,20 @@ class Delivery_Distribution:
                 hour = int(prompt[0:prompt.find(":")])
                 minutes = int(prompt[prompt.find(":")+1:])
                 check_time = datetime(2020,5,29,hour,minutes,0)
-                package_details = self.get_package_details(check_time, self.truck1) + self.get_package_details(check_time, self.truck2)
+                packages = self.get_package_details(check_time, self.truck1) + self.get_package_details(check_time, self.truck2)
                 print("\n")
-                for package in package_details:
-                    print(package.packageID, package.status, package.delivery_time)
+                package_details = {"Delivered":[], "Not Delivered":[], "Out For Delivery":[]}
+                for package in packages:
+                    dets = [package.packageID, package.status, package.delivery_time]
 
+                    if package.status == "Delivered":
+                        package_details["Delivered"].append(dets)
+                    elif package.status == "Not Delivered":
+                        package_details["Not Delivered"].append(dets)
+                    else:
+                        package_details["Out For Delivery"].append(dets)
+
+                pprint(package_details)
                 print("\n")
 
             else:
