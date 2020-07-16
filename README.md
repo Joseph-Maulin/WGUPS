@@ -4,9 +4,25 @@
 
 # Algorithm overview
 
-To solve this routing system requirements I adapted Dijkstra's Algorithm. I have
-an object oriented setup with Truck, Package, and Delivery_Distribution classes. This way
-each object can easily contain all the variables they need to throughout the execution.
+To solve this routing system requirements I adapted Dijkstra's Algorithm. Since each location
+is a node and they are already weighted by the distance to travel to them it seemed to fit well.
+It is also an undirected solution which is ideal since I don't have a end goal target.
+I have an object oriented setup with Truck, Package, and Delivery_Distribution classes. This way
+each object can easily contain all the variables they need to throughout the execution. For a data
+structure I used python dictionaries to hold the package data. Subdivided into "Delivered" and "Undelivered"
+sections for package searches.
+
+
+Other algorithms that I could have used would be A* search and D*.
+
+A* search would be slower to implement since it needs to generate routes for all possibilities to the end
+and then drops the worst one or invalid one. This would also be complicated to generate
+for two trucks simultaneously. A benefit would be ideally fitted routes, but it would be a lot more
+costly to implement.
+
+D* search would involve searching from a goal node and expanding back to the "HUB". Since their is no target to go towards, it
+is not adaptable to this situation. It also causes problems due to package carrying restrictions and having to return the "HUB"
+This like A* would also be heavier on the search side of the solution.
 
 Packages are read from the data.py file, initialized, and loaded into the Delivery_Distribution
 object. The data variables are in a dictionary and the Distances are in a json format listing

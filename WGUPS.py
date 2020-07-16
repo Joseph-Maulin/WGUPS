@@ -538,8 +538,10 @@ class Delivery_Distribution:
                     else:
                         package_details["Out For Delivery"].append(dets)
 
-                pprint(package_details)
-                print("\n")
+                for i,c in package_details.items():
+                    print(i)
+                    pprint(c)
+                    print("\n")
 
             else:
                 package = self.lookup_package(packageID=int(prompt))
