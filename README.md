@@ -8,12 +8,7 @@ WGU Student ID: 001118042
 
 To solve this routing system requirements I adapted Dijkstra's Algorithm. Since each location
 is a node and they are already weighted by the distance to travel to them it seemed to fit well.
-It is also an undirected solution which is ideal since I don't have a end goal target.
-I have an object oriented setup with Truck, Package, and Delivery_Distribution classes. This way
-each object can easily contain all the variables they need to throughout the execution. For a data
-structure I used python dictionaries to hold the package data. Subdivided into "Delivered" and "Undelivered"
-sections for package searches.
-
+The strength of this algorithm is that it is an undirected solution which is ideal since I don't have a end goal target node. Another is that I can easily weight each location node and search through the tree iteratively choosing an ideal next location without having to project too far in advance. I have an object oriented setup with Truck, Package, and Delivery_Distribution classes. This way each object can easily contain all the variables they need to throughout the execution. For a data structure I used python dictionaries to hold the package data. Subdivided into "Delivered" and "Undelivered" sections for package searches.
 
 Other algorithms that I could have used would be A* search and D*.
 
@@ -75,7 +70,9 @@ individual package details can be examined or package statuses can be seen at a 
   Locations are added to truck routes in cycles. The self-adjusting aspect in this solution
   checks if any package delivery deadlines would be missed by this addition. If so, I have
   written a code segment to reorder that truck route (shuffle_for_deadlines) to the most
-  efficient rearrangement that meets all deadlines.
+  efficient rearrangement that meets all deadlines. It is O(1) for package lookups and O(p)
+  for searching through package locations. Packages are moved from a "Not Delivered" subset of
+  the packages dictionary to the "Delivered" reducing location search times throughout execution.
 
   The strength is that a location can be moved around to meet delivery deadlines without
   adding a lot of time complexity to the solution. Otherwise routing would have to have
@@ -324,3 +321,21 @@ Distances = Distances()
   get_route_distance - O(r)
 
   route_time = O(r)
+
+
+
+# Sources
+
+Dijkstra's Algorithm
+https://www.programiz.com/dsa/dijkstra-algorithmhttps://www.programiz.com/dsa/dijkstra-algorithm
+https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
+
+A* search algorithm
+https://en.wikipedia.org/wiki/A*_search_algorithm
+https://www.geeksforgeeks.org/a-search-algorithm/https://www.geeksforgeeks.org/a-search-algorithm/
+
+D* search algorithm
+https://en.wikipedia.org/wiki/D*
+
+Time complexity
+https://www.youtube.com/watch?v=v4cd1O4zkGw
