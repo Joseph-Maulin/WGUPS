@@ -2,7 +2,7 @@
 # need to pack truck 2 with all truck 2 packages
 # group packages that have to be delivered
 # prioritize delivery_deadlines
-from data import packages, Distances
+from data import Delivery_Data
 from datetime import timedelta, time, datetime
 from pprint import pprint
 from copy import deepcopy
@@ -114,11 +114,11 @@ class Delivery_Distribution:
 
     Params
     _______
-        __init__(self, distances, trucks=[])
+        __init__(self, delivery_data, trucks=[])
 
         self.packages = []  :  Packages in the system.
         self.left_to_deliver = 0  :  Packages without "Delivered" status.
-        self.distances = distances  :  Distances object that holds distance information between locations.
+        self.delivery_data = delivery_data  :  Data object that holds distance information between locations.
         self.trucks = trucks  :  Array of Truck objects in the system.
         self.delivery_time = datetime(2020,5,29,8,0,0)  :  Time of day. Start 8:00
         self.end_time = self.delivery_time + timedelta(hours=9)  :  End of day.
@@ -138,6 +138,9 @@ class Delivery_Distribution:
         lookup_status(self, packageID)
             -- lookup package status givin ID
 
+        get_packages_with_deadlines(self, package_search="Not Delivered")
+            -- returns a list of package objects with deadlines other than EOD
+
         set_truck_routes(self)
             -- sets truck routes
 
@@ -154,7 +157,7 @@ class Delivery_Distribution:
             -- checks if shuffled route is valid
 
         get_deadline(self, deadline_packages)
-            -- get minimum deadline to meet for group of packages
+            -- get deadline to meet for group of packages
 
         get_truck_routes(self, truck)
             -- finds optimal route and adds for givin truck
@@ -192,15 +195,15 @@ class Delivery_Distribution:
         get_route_distance(self, route)
             -- return distance of passed route
 
-        route_time(self, route)
+        route_time(self, route, truck_speed)
             -- return time it takes to complete route
 
     """
 
-    def __init__(self, distances, trucks=[]):
+    def __init__(self, delivery_data, trucks=[]):
         self.packages = {"Delivered" : {}, "Not Delivered" : {}}
         self.left_to_deliver = 0
-        self.distances = distances
+        self.delivery_data = delivery_data
         self.trucks = trucks
         self.delivery_time = datetime(2020,5,29,8,0,0)
         self.end_time = self.delivery_time + timedelta(hours=9)
@@ -209,6 +212,11 @@ class Delivery_Distribution:
         self.packages_with_deadlines = []
 
     def add_package(self, packageID, delivery_address, address_Name, delivery_deadline, delivery_city, delivery_zip_code, weight, status, truck=0, available="8:00", packaged_with=[]):
+        """
+        Initializes packages with information provided in the package data.
+        Adds packages to self.packages
+        """
+
         if available == "8:00":
             available = self.delivery_time
         else:
@@ -229,6 +237,11 @@ class Delivery_Distribution:
 
 
     def lookup_package(self, packageID=None, delivery_address=None, address_Name=None, delivery_deadline=None, delivery_city=None, delivery_zip_code=None, weight=None, status=None):
+        """
+        Lookup package details.
+        Searches and returns package objects that align with passed search parameters.
+        """
+
         packages = []
 
         if packageID in self.packages["Delivered"].keys():
@@ -278,10 +291,18 @@ class Delivery_Distribution:
 
 
     def lookup_status(self, packageID):
+        """
+        Returns package status for givin packageID
+        """
+
         return self.lookup_package(packageID=packageID)[0].status
 
 
     def get_packages_with_deadlines(self, package_search="Not Delivered"):
+        """
+        Returns a list of package objects with delivery deadlines other than EOD
+        """
+
         packages_with_deadlines = []
         for packageID, package in self.packages[package_search].items():
             if package.delivery_deadline != self.end_time:
@@ -290,6 +311,13 @@ class Delivery_Distribution:
         return packages_with_deadlines
 
     def set_truck_routes(self):
+        """
+        Increments by delivery time and calls find_and_deliver(truck) for whichever truck is available.
+        When all packages are delivered. checks are run to see if all package deadlines are met
+        and adjust truck routes if necessary. Finally, prints routing results by calling
+        print_route_results.
+        """
+
         self.packages_with_deadlines = self.get_packages_with_deadlines()
         self.left_to_deliver = len(self.packages["Not Delivered"])
 
@@ -334,6 +362,10 @@ class Delivery_Distribution:
 
 
     def check_if_met_deadlines(self):
+        """
+        Searches delivered packages to check if delivery deadlines have been met.
+        Returns and packageIDs that have not met delivery deadlines.
+        """
 
         deadlines_not_met = []
         for packageID, package in self.packages["Delivered"].items():
@@ -344,6 +376,11 @@ class Delivery_Distribution:
 
 
     def shuffle_for_deadlines(self, deadlines_not_met):
+        """
+        Rearranges routes so that all package deadlines are met. Inserts route location into
+        truck.shortest_route and runs route_is_valid check. Updates truck.shortest_route to the
+        most efficient rearrangement that meets the deadlines.
+        """
 
         deadline_package_index = -1
         truck = 0
@@ -372,7 +409,7 @@ class Delivery_Distribution:
             finish_index = len(route)
             for i in range(len(route)-1):
                 seg = [route[i], route[i+1]]
-                delivery_time += timedelta(seconds=self.route_time(seg))
+                delivery_time += timedelta(seconds=self.route_time(seg, truck.average_speed))
 
                 if delivery_time >= time_to_meet:
                     finish_index = i
@@ -406,12 +443,12 @@ class Delivery_Distribution:
 
                     delivery_time = datetime(2020,5,29,8,0,0)
                     for i in range(1, len(route)):
-                        delivery_time += timedelta(seconds=self.route_time([route[i-1], route[i]]))
+                        delivery_time += timedelta(seconds=self.route_time([route[i-1], route[i]], truck.average_speed))
 
                         location_packages = self.get_packages(route[i], truck, package_search="Delivered")
 
                         for package in location_packages:
-                            if package.packageID in packages_with_deadlines and package.delivery_deadline + timedelta(seconds=self.route_time([deadline_location, package.address_Name])) > delivery_time:
+                            if package.packageID in packages_with_deadlines and package.delivery_deadline + timedelta(seconds=self.route_time([deadline_location, package.address_Name], truck.average_speed)) > delivery_time:
                                 if i>1:
                                     temp = route[i-1]
                                     route[i-1] = route[i]
@@ -432,11 +469,14 @@ class Delivery_Distribution:
 
 
     def adjust_delivery_times(self, truck):
+        """
+        Recalculates package delivery times for a shuffled route
+        """
 
         delivery_time = datetime(2020,5,29,8,0,0)
         for i in range(1,len(truck.shortest_route)):
             route_seg = [truck.shortest_route[i-1], truck.shortest_route[i]]
-            delivery_time += timedelta(seconds = self.route_time(route_seg))
+            delivery_time += timedelta(seconds = self.route_time(route_seg, truck.average_speed))
             if truck.shortest_route[i] == "HUB":
                 continue
             else:
@@ -447,6 +487,10 @@ class Delivery_Distribution:
 
 
     def route_is_valid(self, route, truck):
+        """
+        Checks if route meets all constraints (ex. deadlines met, packged_with, max_packages).
+        Returns boolean of route validity.
+        """
 
         packages_with_deadlines = self.get_packages_with_deadlines(package_search="Delivered")
         packaged_with = [13, 14, 15, 16, 19, 20]
@@ -456,7 +500,7 @@ class Delivery_Distribution:
         delivery_time = datetime(2020,5,29,8,0,0)
         for i in range(len(route)):
             if i != 0:
-                delivery_time += timedelta(seconds=self.route_time([route[i-1], route[i]]))
+                delivery_time += timedelta(seconds=self.route_time([route[i-1], route[i]], truck.average_speed))
 
             if route[i] == "HUB":
                 if packaged_with_taken and packaged_with:
@@ -483,6 +527,9 @@ class Delivery_Distribution:
 
 
     def get_deadline(self, deadline_packages):
+        """
+        Get time to meet for deadline_packages passed. Returns datetime object.
+        """
 
         time_to_meet = datetime(2020,5,29,17,0,0)
         for package in deadline_packages:
@@ -492,6 +539,12 @@ class Delivery_Distribution:
         return time_to_meet
 
     def print_route_results(self):
+        """
+        Prints package status at delivery_times via print_status method.
+        Prints each trucks final route distance, route, and number of packages.
+        Prints total distance travelled for both trucks.
+        Finally, calls end_lookups for user inspection of results.
+        """
 
         self.print_status()
 
@@ -512,6 +565,10 @@ class Delivery_Distribution:
 
 
     def end_lookups(self):
+        """
+        User interface to lookup results of the program execution. Individual package details
+        can be seen, all packages, or package statuses at a given time
+        """
 
         print("\n")
 
@@ -519,9 +576,32 @@ class Delivery_Distribution:
 
             # try:
             print("Check package details by packageID or see all status at specified time")
-            prompt = str(input("(ex. 1 or 8:30, enter q to quit): "))
+            prompt = str(input("(ex. 1 or 8:30 or all, enter q to quit): "))
 
-            if ":" in prompt:
+            if prompt == "all":
+                for packageID, package in self.packages['Delivered'].items():
+
+                    print_package = deepcopy(package)
+                    print_package.status = "Delivered"
+                    print_package.delivery_time = print_package.delivery_time.strftime("%H:%M:%S")
+                    print_package.delivery_deadline = print_package.delivery_deadline.strftime("%H:%M:%S")
+                    print_package.available = print_package.available.strftime("%H:%M:%S")
+
+                    print('\n')
+                    print('package ID: ',  print_package.packageID)
+                    print('weight: ', print_package.weight)
+                    print('status: ', print_package.status)
+                    print('truck: ', print_package.truck)
+                    print('delivery address: ', print_package.delivery_address)
+                    print('address name: ', print_package.address_Name)
+                    print('city: ', print_package.delivery_city)
+                    print('zip: ', print_package.delivery_zip_code)
+                    print('available: ', print_package.available)
+                    print('delivery_deadline: ', print_package.delivery_deadline)
+                    print('delivery_time: ', print_package.delivery_time)
+
+
+            elif ":" in prompt:
                 hour = int(prompt[0:prompt.find(":")])
                 minutes = int(prompt[prompt.find(":")+1:])
                 check_time = datetime(2020,5,29,hour,minutes,0)
@@ -529,11 +609,15 @@ class Delivery_Distribution:
                 print("\n")
                 package_details = {"Delivered":[], "Not Delivered":[], "Out For Delivery":[]}
                 for package in packages:
-                    dets = [package.packageID, package.status, package.delivery_time]
+                    dets = {'packageID':package.packageID,
+                            'delivery_time':package.delivery_time.strftime("%H:%M:%S"),
+                            'truck':package.truck}
 
                     if package.status == "Delivered":
+                        dets.pop('truck')
                         package_details["Delivered"].append(dets)
                     elif package.status == "Not Delivered":
+                        dets.pop('truck')
                         package_details["Not Delivered"].append(dets)
                     else:
                         package_details["Out For Delivery"].append(dets)
@@ -543,10 +627,32 @@ class Delivery_Distribution:
                     pprint(c)
                     print("\n")
 
+            elif prompt == "q":
+                print("\nThank you. Now exiting..\n")
+                break
+
             else:
                 package = self.lookup_package(packageID=int(prompt))
-                package.status = "Delivered"
-                print("\n", package, "\n")
+                print_package = deepcopy(package)
+                print_package.status = "Delivered"
+                print_package.delivery_time = print_package.delivery_time.strftime("%H:%M:%S")
+                print_package.delivery_deadline = print_package.delivery_deadline.strftime("%H:%M:%S")
+                print_package.available = print_package.available.strftime("%H:%M:%S")
+
+                print('\n')
+                print('package ID: ',  print_package.packageID)
+                print('weight: ', print_package.weight)
+                print('status: ', print_package.status)
+                print('truck: ', print_package.truck)
+                print('delivery address: ', print_package.delivery_address)
+                print('address name: ', print_package.address_Name)
+                print('city: ', print_package.delivery_city)
+                print('zip: ', print_package.delivery_zip_code)
+                print('available: ', print_package.available)
+                print('delivery_deadline: ', print_package.delivery_deadline)
+                print('delivery_time: ', print_package.delivery_time)
+                print('\n')
+
 
             # except Exception as e:
             #     print(e)
@@ -554,9 +660,11 @@ class Delivery_Distribution:
 
 
     def get_package_details(self, check_time, truck):
+        """
+        Get package details for truck route at given check_time.
+        Returns a list of package details as they were at the given time.
+        """
 
-        # go through truck route and set delivered for all packages before check_time.
-        # if after go until "HUB" and set to "out for delivery"
         current_time = datetime(2020,5,29,8,0,0)
         packages = self.packages["Delivered"]
         passed_hub = False
@@ -565,7 +673,7 @@ class Delivery_Distribution:
         for i in range(1,len(truck.shortest_route)):
 
             location = truck.shortest_route[i]
-            current_time =  current_time + timedelta(seconds=self.route_time([truck.shortest_route[i-1], location]))
+            current_time =  current_time + timedelta(seconds=self.route_time([truck.shortest_route[i-1], location], truck.average_speed))
             # print("get_package", location, current_time)
 
             if current_time > check_time and not passed_hub:
@@ -598,9 +706,9 @@ class Delivery_Distribution:
 
 
     def print_status(self):
-
-        # status is "Out for delivery" between "HUB"s
-        # "Delivered" if delivery_time >= route_time
+        """
+        Prints the status of packages at each delivery time throughout the day.
+        """
 
         packages = self.packages["Delivered"]
 
@@ -626,6 +734,12 @@ class Delivery_Distribution:
 
 
     def find_and_deliver(self, truck):
+        """
+        Updates information about packages being currently delivered. Gets delivery_time of next
+        found route from get_truck_routes(). Sets truck's next delivery_time and moves truck to HUB
+        if no next location is found or package limit is reached. Marks truck as done if at HUB and
+        no packages are left to deliver.
+        """
 
         if not truck.done:
             if truck.packages:
@@ -640,7 +754,7 @@ class Delivery_Distribution:
                 if self.left_to_deliver > 0 and truck.current_location != "HUB":
                     truck.shortest_route.append("HUB")
                     truck.time_left_hub = self.delivery_time
-                    truck.time_of_next_delivered = self.delivery_time + timedelta(seconds = self.route_time([truck.current_location, "HUB"]))
+                    truck.time_of_next_delivered = self.delivery_time + timedelta(seconds = self.route_time([truck.current_location, "HUB"], truck.average_speed))
                     truck.current_location = "HUB"
                     truck.carried_without_going_to_hub = 0
                 else:
@@ -651,6 +765,10 @@ class Delivery_Distribution:
 
 
     def get_truck_routes(self, truck):
+        """
+        Find available locations, find truck route, and add_route if route found.
+        Returns next delivery time or None if no route addition found.
+        """
 
         if len(truck.packages) == 16:
             return None
@@ -666,6 +784,11 @@ class Delivery_Distribution:
 
 
     def add_route(self, truck, location):
+        """
+        Updates truck data, adds packages/locations to route, returns projected delivery_time.
+        If "HUB" in route add "HUB" distance and location to the route and reset packages
+        carried away from hub. Mark packages' time of delivery.
+        """
 
         new_location = location[0]
         hub_time = 0
@@ -674,19 +797,19 @@ class Delivery_Distribution:
             new_location = new_location[1]
             truck.shortest_route.append("HUB")
             truck.carried_without_going_to_hub = 0
-            hub_time = self.route_time([truck.current_location, "HUB"])
+            hub_time = self.route_time([truck.current_location, "HUB"], truck.average_speed)
 
         truck.current_location = new_location
         truck.locations.remove(truck.current_location)
         truck.shortest_route.append(new_location)
-        truck.route_time = self.route_time(truck.shortest_route)
+        truck.route_time = self.route_time(truck.shortest_route, truck.average_speed)
         truck.currently_delivering_to = new_location
 
         location_packages = location[2]
         if hub_time:
-            delivery_time = self.delivery_time + timedelta(seconds=hub_time + self.route_time(truck.shortest_route[-2:]))
+            delivery_time = self.delivery_time + timedelta(seconds=hub_time + self.route_time(truck.shortest_route[-2:], truck.average_speed))
         else:
-            delivery_time = self.delivery_time + timedelta(seconds=self.route_time(truck.shortest_route[-2:]))
+            delivery_time = self.delivery_time + timedelta(seconds=self.route_time(truck.shortest_route[-2:], truck.average_speed))
 
         for package in location_packages:
 
@@ -710,9 +833,9 @@ class Delivery_Distribution:
         truck.carried_without_going_to_hub += len(location_packages)
         # # for package in location_packages:
         # #     if hub_time:
-        # #         delivery_time = self.delivery_time + timedelta(seconds=hub_time + self.route_time(truck.shortest_route[-2:]))
+        # #         delivery_time = self.delivery_time + timedelta(seconds=hub_time + self.route_time(truck.shortest_route[-2:], truck.average_speed))
         # #     else:
-        # #         delivery_time = self.delivery_time + timedelta(seconds=self.route_time(truck.shortest_route[-2:]))
+        # #         delivery_time = self.delivery_time + timedelta(seconds=self.route_time(truck.shortest_route[-2:], truck.average_speed))
         #
         #     package.truck = truck.truckNum
         #     package.status = "Delivered"
@@ -723,6 +846,11 @@ class Delivery_Distribution:
         return delivery_time
 
     def find_route(self, truck, locations, packaged_with_left=[]):
+        """
+        Find most efficient next location to add to route. Locations are weighted by
+        package per distance (location_packages / route_distance). Adds "HUB" travel
+        to the route if necessary.
+        """
 
         shortest_route = [[truck.current_location], 0]
         location_visited = [truck.current_location]
@@ -763,7 +891,7 @@ class Delivery_Distribution:
                     if truck.truckNum == self.packaged_with_truck and len(packaged_with_left)>0:
                         continue
                     else:
-                        route_distance = self.get_route_distance(new_route) + self.distances.distances["HUB"][location]
+                        route_distance = self.get_route_distance(new_route) + self.delivery_data.distances["HUB"][location]
 
                         location_ppd = len(packages) / route_distance
 
@@ -777,6 +905,11 @@ class Delivery_Distribution:
 
 
     def get_packages(self, location, truck, package_search="Not Delivered"):
+        """
+        Get packages for given location and truck. Returns list of package objects
+        that have that location delivery address.
+        """
+
         packages = []
         for package in self.packages[package_search].values():
             if package.address_Name == location:
@@ -787,6 +920,11 @@ class Delivery_Distribution:
 
 
     def get_available_locations(self, truck):
+        """
+        Get available locations to search for truck route.
+        Prioritizes filling packaged_with packages.
+        Returns a list of locations that are eligible for delivery for given truck.
+        """
 
         available = []
 
@@ -796,7 +934,7 @@ class Delivery_Distribution:
                 return available
 
         for package in self.packages["Not Delivered"].values():
-            if(self.delivery_time + timedelta(seconds=self.route_time([truck.current_location, "HUB"]))>=package.available):
+            if(self.delivery_time + timedelta(seconds=self.route_time([truck.current_location, "HUB"], truck.average_speed))>=package.available):
                 if int(package.truck) == 0 or int(package.truck) == int(truck.truckNum):
                     available.append(package.address_Name)
 
@@ -804,31 +942,42 @@ class Delivery_Distribution:
 
 
     def get_deadline_locations(self, deadline_packages):
+        """
+        Get all delivery locations for passed deadline_packages
+        """
         return list(set(self.packages["Not Delivered"][packageID].address_Name for packageID in deadline_packages))
 
 
     def get_route_distance(self, route):
+        """
+        Get distance travelled of passed route based on data.Distances
+        """
+
         distance = 0
         for i in range(len(route)-1):
-            distance += self.distances.distances[route[i]][route[i+1]]
+            distance += self.delivery_data.distances[route[i]][route[i+1]]
 
         return distance
 
 
-    def route_time(self, route):
+    def route_time(self, route, truck_speed):
+        """
+        Get time to complete route in seconds. Based of distance/truck speed
+        """
+
         distance_miles = self.get_route_distance(route)
-        distance_time = (distance_miles / 18) * 60 * 60
+        distance_time = (distance_miles / truck_speed) * 60 * 60
 
         return distance_time
 
 
 
 if __name__ == "__main__":
-    Distances = Distances()
+    SLC_Delivery_Data = Delivery_Data()
     truck1 = Truck(1)
     truck2 = Truck(2)
-    dd = Delivery_Distribution(Distances, trucks=[truck1, truck2])
-    for packageID, package_vars in packages.items():
+    dd = Delivery_Distribution(SLC_Delivery_Data, trucks=[truck1, truck2])
+    for packageID, package_vars in SLC_Delivery_Data.packages.items():
         truck = 0
         available = "8:00"
         packaged_with = []
@@ -842,7 +991,7 @@ if __name__ == "__main__":
 
         dd.add_package(packageID,
                        package_vars["Address"],
-                       Distances.address_to_place[package_vars["Address"]],
+                       SLC_Delivery_Data.address_to_place[package_vars["Address"]],
                        package_vars["Delivery_Deadline"],
                        package_vars["City"],
                        package_vars["Zip"],

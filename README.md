@@ -1,5 +1,7 @@
 
-# Created by Joseph Maulin WGU Student ID: 001118042
+## Created by
+Joseph Maulin
+WGU Student ID: 001118042
 
 
 # Algorithm overview
@@ -47,14 +49,15 @@ individual package details can be examined or package statuses can be seen at a 
   This solution is fairly adaptable. The distance data and locations can be
   easily swapped with another set. The data variables and distances to other locations
   used in this adaption are in json format. It seems reasonable that data would be collected
-  to use in that form for a different set. The solution is adaptable to changes that
-  can occur during daily execution since it is finding the next route location
-  one by one instead of locking in a set route. I have also included route rearrangements
-  if deadlines are not met. Also Finally I believe it can be scaled
-  without problem since any additions are just additions to the json input. Thinking about
-  scalability as well I have reductions in location searches based on truck eligibility.
-  Also there is a reduction in n of package searches during the program as packages delivered
-  are moved into a separate dictionary key.
+  to use in that form for a different set of data. This would be passed in the form of a json
+  object with the keys "packages", "distances", and "address_to_place". The Data class in data.py
+  is a hard coded version of this.
+
+  The data structure I have set up object oriented based.
+  Package data is read from the Data object, initialized into package objects, and stored in a python dictionary in the Delivery_Distribution object. Truck objects are also stored with the Delivery_Distribution object. This keeps the process object oriented so that data is easily organized, flexible, and access time is fast during execution.
+
+  The solution is adaptable to changes that can occur during daily execution since it is finding the next route location one by one instead of locking in a set route. I have also included route rearrangements
+  if deadlines are not met. Also Finally I believe it can be scaled without problem since any additions are just additions to the json input. Thinking about scalability as well I have reductions in location searches based on truck eligibility. Also there is a reduction in n of package searches during the program as packages delivered are moved into a separate dictionary key.
 
 # Discuss the efficiency and maintainability of the software.
 
@@ -87,6 +90,14 @@ individual package details can be examined or package statuses can be seen at a 
   Another is that if this was to become a real time live service. Package delivery times
   would need to be calculated from "HUB" to "HUB" to get accurate delivery times for packages
   beforehand.
+
+  Finally, the data in this execution is hard coded in data.py. Ideally, instead of providing .xlsx
+  the data could be provided in a standard json format which is what I have translated the provided
+  docs into. The Distances class is just a container to hold the information. In a production capacity
+  an API could be set to collect GET requests passed in json format with "packages", "distances", and
+  "address_to_place" keys. The program would then execute the same way and the return would be the route
+  information jsonified.
+
 
 
 
@@ -144,7 +155,7 @@ Distances = Distances()
       > sets delivery_deadline and availability information
 
   > set_truck_routes
-      > increments by delivery time and calls find_and_deliver(truck) whichever truck is   available
+      > increments by delivery time and calls find_and_deliver(truck) for whichever truck is available
       > when all packages are delivered. checks are run to see if all package deadlines are met
       and adjust truck routes if necessary
       > finally prints routing results print_route_results
@@ -210,7 +221,7 @@ Distances = Distances()
           > return all packages with deadlines other than end of day
 
       > get_deadline
-          > get minimum time to meet for deadline_packages passed
+          > get time to meet for deadline_packages passed
 
       > get_packages
           > get packages for given location and truck
