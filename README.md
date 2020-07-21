@@ -1,100 +1,95 @@
 
 ## Created by
-Joseph Maulin
-WGU Student ID: 001118042
+  Joseph Maulin
+  WGU Student ID: 001118042
 
 
 # Algorithm overview
 
-To solve this routing system requirements I adapted Dijkstra's Algorithm. Since each location
-is a node and they are already weighted by the distance to travel to them it seemed to fit well.
-The strength of this algorithm is that it is an undirected solution which is ideal since I don't have a end goal target node. Another is that I can easily weight each location node and search through the tree iteratively choosing an ideal next location without having to project too far in advance. I have an object oriented setup with Truck, Package, and Delivery_Distribution classes. This way each object can easily contain all the variables they need to throughout the execution. For a data structure I used python dictionaries to hold the package data. Subdivided into "Delivered" and "Undelivered" sections for package searches.
+  To solve this routing system requirements I adapted Dijkstra's Algorithm. Since each location is a node and they are already weighted
+  by the distance to travel to them it seemed to fit well (Dijkstra's Algorithm, Programiz). The strength of this algorithm is that it is
+  an undirected solution which is ideal since I don't have a end goal target node (Dijkstra's Algorithm, Programiz). Another is that I can
+  easily weight each location node and search through the tree iteratively choosing an ideal next location without having to project too far
+  in advance (Dijkstra's Algorithm, Programiz). I have an object oriented setup with Truck, Package, and Delivery_Distribution classes.
+  This way each object can easily contain all the variables they need to throughout the execution. For a data structure I used python dictionaries
+  to hold the package data. Subdivided into "Delivered" and "Undelivered" sections for package searches.
 
-Other algorithms that I could have used would be A* search and D*.
+  Other algorithms that I could have used would be A* search and D*.
 
-A* search would be slower to implement since it needs to generate routes for all possibilities to the end
-and then drops the worst one or invalid one. This would also be complicated to generate
-for two trucks simultaneously. A benefit would be ideally fitted routes, but it would be a lot more
-costly to implement.
+  A* search would be slower to implement since it needs to generate routes for all possibilities to the end and then drops the worst one or invalid one.
+  This would also be complicated to generate for two trucks simultaneously. A benefit would be ideally fitted routes, but it would be a lot more costly
+  to implement. (A* Search Algorithm, Geeks for Geeks)
 
-D* search would involve searching from a goal node and expanding back to the "HUB". Since their is no target to go towards, it
-is not adaptable to this situation. It also causes problems due to package carrying restrictions and having to return the "HUB"
-This like A* would also be heavier on the search side of the solution.
+  D* search would involve searching from a goal node and expanding back to the "HUB". Since their is no target to go towards, it is not adaptable to this
+  situation. It also causes problems due to package carrying restrictions and having to return the "HUB". This like A* would also be heavier on the search
+  side of the solution. (D* Search Algorithm, Wikipedia)
 
-Packages are read from the data.py file, initialized, and loaded into the Delivery_Distribution
-object. The data variables are in a dictionary and the Distances are in a json format listing
-distances between each of the locations.
+  Packages are read from the data.py file, initialized, and loaded into the Delivery_Distribution object. The data variables are in a dictionary and the
+  distances are in a json format listing distances between each of the locations.
 
-The main code flow is as follows. I have opted for a greedy version of Dijkstra's Algorithm.
-The purpose being that two trucks are operating simultaneously. The truck with the next available
-open time searches for the next package delivery location. The available locations are
-filtered by whether that truck is eligible. This is based on whether the location has non-delivered
-or in route packages, packaged with packages responsibility, and truck number requirements,
-and package availability. Then I use a greedy approach where the locations are the nodes and it chooses
-the best packages delivered per mile as the node number. The location is then added to the truck.
-The route is then checked to see if any deadlines would not be met and rearranges the route if necessary.
-When the truck routes are finalized I print out the times when a delivery has occurred and the delivery status
-of the packages at that time. I have included travel times back to the delivery "HUB" during routing.
-Delivery times themselves are tracked in each package object. Finally I go into a user interface where
-individual package details can be examined or package statuses can be seen at a certain time.
+  The main code flow is as follows. I have opted for a greedy version of Dijkstra's Algorithm. The purpose being that two trucks are operating simultaneously.
+  The truck with the next available open time searches for the next package delivery location. The available locations are filtered by whether that truck is eligible.
+  This is based on whether the location has non-delivered or in route packages, packaged with packages responsibility, and truck number requirements,
+  and package availability. Then I use a greedy approach where the locations are the nodes and it chooses the best packages delivered per mile as the node number.
+  The location is then added to the truck. The route is then checked to see if any deadlines would not be met and rearranges the route if necessary.
+  When the truck routes are finalized I print out the times when a delivery has occurred and the delivery status of the packages at that time. I have included
+  travel times back to the delivery "HUB" during routing. Delivery times themselves are tracked in each package object. Finally I go into a user interface where
+  individual package details can be examined or package statuses can be seen at a certain time.
 
 
 # Discuss the ability of your solution to adapt to a changing market and to scalability.
 
-  This solution is fairly adaptable. The distance data and locations can be
-  easily swapped with another set. The data variables and distances to other locations
-  used in this adaption are in json format. It seems reasonable that data would be collected
-  to use in that form for a different set of data. This would be passed in the form of a json
-  object with the keys "packages", "distances", and "address_to_place". The Data class in data.py
-  is a hard coded version of this.
+  This solution is fairly adaptable. The distance data and locations can be easily swapped with another set. The data variables and distances to other locations
+  used in this adaption are in json format. It seems reasonable that data would be collected to use in that form for a different set of data. This would be passed
+  in the form of a json object with the keys "packages", "distances", and "address_to_place". The Data class in data.py is a hard coded version of this.
 
-  The data structure I have set up object oriented based.
-  Package data is read from the Data object, initialized into package objects, and stored in a python dictionary in the Delivery_Distribution object. Truck objects are also stored with the Delivery_Distribution object. This keeps the process object oriented so that data is easily organized, flexible, and access time is fast during execution.
+  The data structure I have set up object oriented based. Package data is read from the Data object, initialized into package objects, and stored in a python dictionary
+  in the Delivery_Distribution object. Truck objects are also stored with the Delivery_Distribution object. This keeps the process object oriented so that data is easily
+  organized, flexible, and access time is fast during execution.
 
-  The solution is adaptable to changes that can occur during daily execution since it is finding the next route location one by one instead of locking in a set route. I have also included route rearrangements
-  if deadlines are not met. Also Finally I believe it can be scaled without problem since any additions are just additions to the json input. Thinking about scalability as well I have reductions in location searches based on truck eligibility. Also there is a reduction in n of package searches during the program as packages delivered are moved into a separate dictionary key.
+  The solution is adaptable to changes that can occur during daily execution since it is finding the next route location one by one instead of locking in a set route.
+  I have also included route rearrangements if deadlines are not met. Also Finally I believe it can be scaled without problem since any additions are just additions
+  to the json input. Thinking about scalability as well I have reductions in location searches based on truck eligibility. Also there is a reduction in n of package
+  searches during the program as packages delivered are moved into a separate dictionary key.
 
 # Discuss the efficiency and maintainability of the software.
 
-  The efficiency is quadratic, but n's scale down as packages are delivered
-  due to the dictionary access of self.packages. Also some worst case
-  scenarios are factored in such as all packages being deadlined before
-  end of day.
+  The efficiency is quadratic, but n's scale down as packages are delivered due to the dictionary access of self.packages. Also some worst case scenarios are factored
+  in such as all packages having deadlines before end of day.
 
-  The code set should be easy to maintain due to the object oriented design.
-  Functionality can be added or adjusted to certain methods without drastically effecting other method processes.
+  The code set should be easy to maintain due to the object oriented design. Functionality can be added or adjusted to certain methods without drastically effecting other method processes.
 
 
 # Discuss the self-adjusting data structures chosen and their strengths and weaknesses based on the scenario.
 
-  Locations are added to truck routes in cycles. The self-adjusting aspect in this solution
-  checks if any package delivery deadlines would be missed by this addition. If so, I have
-  written a code segment to reorder that truck route (shuffle_for_deadlines) to the most
-  efficient rearrangement that meets all deadlines. It is O(1) for package lookups and O(p)
-  for searching through package locations. Packages are moved from a "Not Delivered" subset of
-  the packages dictionary to the "Delivered" reducing location search times throughout execution.
+  Locations are added to truck routes in cycles. The self-adjusting aspect in this solution checks if any package delivery deadlines would be missed by this addition.
+  If so, I have written a code segment to reorder that truck route, shuffle_for_deadlines, to the most efficient rearrangement that meets all deadlines. It is O(1)
+  for package lookups and O(p) for searching through package locations. Packages are moved from a "Not Delivered" subset of the packages dictionary to the "Delivered"
+  reducing location search times throughout execution. The memory requirements for this example are 2240 bytes for all the packages or 56 bytes per package object instance.
+  The dictionary container uses 1184 bytes to hold the package data. Each truck is also 56 bytes per object instance as well as the delivery distribution object.
+  So overall, the amount of memory and bandwidth needed to execute this program is fairly small and highly scalable. For expansion into other cities/markets, I think this structure is
+  advantageous since different objects can be initialized to run in different cities. In other words, the operations can be separated into different instances of the program and be tuned
+  to any specialized needs. For adding trucks the set_truck_routes method would need to be slightly adjusted to move through a list of trucks. The rest of the program though is passed
+  instances of trucks and wouldn't need any adjustment.
 
-  The strength is that a location can be moved around to meet delivery deadlines without
-  adding a lot of time complexity to the solution. Otherwise routing would have to have
-  simulated lookaheads on each cycle. These would be exponential since you are also looking
-  for the least amount of distance travelled. So you would essentially have to simulate all
-  possibilities, check if deadlines are met, and look for the most efficient. This seems like
-  a reasonable less intensive middle ground solution.
 
-  A weaknesses of this solution are that the solution's time complexity is based on
-  the length of the current route of locations. So rearrangements later in the day become
-  more intensive. Each truck route length is lowered with each other truck in service though.
-  Another is that if this was to become a real time live service. Package delivery times
-  would need to be calculated from "HUB" to "HUB" to get accurate delivery times for packages
-  beforehand.
+  The strength is that a location can be moved around to meet delivery deadlines without adding a lot of time complexity to the solution. Otherwise routing would have to have
+  simulated lookaheads on each cycle. These would be exponential since you are also looking for the least amount of distance travelled. So you would essentially have to simulate all
+  possibilities, check if deadlines are met, and look for the most efficient. The strength of this algorithm is that it is an undirected solution which is ideal since I don't have a
+  end goal target node. Another is that I can easily weight each location node and search through the tree iteratively choosing an ideal next location without having to project too
+  far in advance. This seems like a reasonable less intensive middle ground solution.
 
-  Finally, the data in this execution is hard coded in data.py. Ideally, instead of providing .xlsx
-  the data could be provided in a standard json format which is what I have translated the provided
-  docs into. The Distances class is just a container to hold the information. In a production capacity
-  an API could be set to collect GET requests passed in json format with "packages", "distances", and
-  "address_to_place" keys. The program would then execute the same way and the return would be the route
-  information jsonified.
+  A weaknesses of this solution are that the solution's time complexity is based on the length of the current route of locations. So rearrangements later in the day become
+  more intensive. Each truck route length is lowered with each other truck in service though. Another is that if this was to become a real time live service. Package delivery times
+  would need to be calculated from "HUB" to "HUB" to get accurate delivery times for packages beforehand.
 
+  I used a key-value pair dictionary for the containers for packages. Since each package has an autoincrement package id. A hash table with a key of packageID would also
+  function the same as the python dictionary. This would not have any collision issues due to the pacakgeID being a primary key identifier. I could also just use an array/list
+  to hold the package objects. This wouldn't be detrimental to search for specific criteria, but would always be O(n) for pulling packages by packageID.
+
+  Finally, the data in this execution is hard coded in data.py. Ideally, instead of providing .xlsx the data could be provided in a standard json format which is what I have
+  translated the provided docs into. The Distances class is just a container to hold the information. In a production capacity an API could be set to collect GET requests
+  passed in json format with "packages", "distances", and "address_to_place" keys. The program would then execute the same way and the return would be the route information jsonified.
 
 
 
@@ -234,6 +229,10 @@ Distances = Distances()
 
 
 ## Evaluate space-time complexity using Big O notation throughout the coding and for the entire program.
+
+  Source for learning more about time complexity :
+  (Big O Notation, HackerRank, https://www.youtube.com/watch?v=v4cd1O4zkGw)
+
   p = number of packages
   r = length of truck route
   l = locations
@@ -327,13 +326,12 @@ Distances = Distances()
 # Sources
 
 Dijkstra's Algorithm
-https://www.programiz.com/dsa/dijkstra-algorithmhttps://www.programiz.com/dsa/dijkstra-algorithm
+https://www.programiz.com/dsa/dijkstra-algorithm
 https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
 
 A* search algorithm
 https://en.wikipedia.org/wiki/A*_search_algorithm
-https://www.geeksforgeeks.org/a-search-algorithm/https://www.geeksforgeeks.org/a-search-algorithm/
-
+https://www.geeksforgeeks.org/a-search-algorithm
 D* search algorithm
 https://en.wikipedia.org/wiki/D*
 

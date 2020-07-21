@@ -1,11 +1,15 @@
 
-# need to pack truck 2 with all truck 2 packages
-# group packages that have to be delivered
-# prioritize delivery_deadlines
+## Created by
+# Joseph Maulin
+# WGU Student ID: 001118042
+
+
 from data import Delivery_Data
 from datetime import timedelta, time, datetime
 from pprint import pprint
 from copy import deepcopy
+import sys
+
 
 class Truck:
     """
@@ -627,7 +631,7 @@ class Delivery_Distribution:
                     pprint(c)
                     print("\n")
 
-            elif prompt == "q":
+            elif prompt == "q" or prompt == "quit":
                 print("\nThank you. Now exiting..\n")
                 break
 
