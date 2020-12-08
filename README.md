@@ -1,7 +1,6 @@
 
 ## Created by
   Joseph Maulin
-  WGU Student ID: 001118042
 
 
 # Algorithm overview
